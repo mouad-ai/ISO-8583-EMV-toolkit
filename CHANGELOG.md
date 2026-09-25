@@ -14,7 +14,10 @@
 - Input detection in `core`: hex (spaces, newlines, `0x`, commas allowed), base64, or raw ASCII, with a manual override.
 - Hex dump layout in `core` with byte-offset ↔ text-position mapping.
 - Tool window: input area, format selector, tree and hex view with two-way highlighting.
-  Structured ISO 8583/TLV nodes, the dialect selector and the masking toggle follow once the M1/M2 core decoders land.
+- "Decode as EMV TLV" (default) shows every tag with name, formatted value, raw hex, set bits and DOL entries, fully expanded.
+- Sensitive tags are masked in the tree and in the hex view; a session-only "Reveal sensitive values" toggle shows them.
+- TLV parse errors are shown under the input with their offset.
+- ISO 8583 decoding and the dialect selector follow once M2 lands.
 
 ### M0 — Scaffold
 - Gradle multi-module build: `core` (pure Kotlin/JVM, JUnit 5) and `plugin` (IntelliJ Platform Gradle Plugin 2.x).

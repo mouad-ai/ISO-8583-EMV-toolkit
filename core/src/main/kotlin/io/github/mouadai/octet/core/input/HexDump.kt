@@ -3,9 +3,13 @@ package io.github.mouadai.octet.core.input
 /**
  * Classic hex dump layout (`offset  hex bytes  ascii`) with a two-way mapping between byte offsets
  * and character positions in [text], so a UI can highlight a decoded element's bytes and find the
- * element under the caret.
+ * element under the caret. Bytes inside [masked] ranges (sensitive values) are shown as `**` / `*`.
  */
-class HexDump(private val bytes: ByteArray, private val bytesPerLine: Int = 16) {
+class HexDump(
+    private val bytes: ByteArray,
+    private val bytesPerLine: Int = 16,
+    private val masked: List<IntRange> = emptyList(),
+) {
 
     init {
         require(bytesPerLine > 0) { "bytesPerLine must be positive" }
@@ -25,15 +29,25 @@ class HexDump(private val bytes: ByteArray, private val bytesPerLine: Int = 16) 
             val lineEnd = minOf(lineStart + bytesPerLine, bytes.size)
             append(lineStart.toString(16).uppercase().padStart(offsetWidth, '0'))
             append("  ")
-            val hex = (lineStart until lineEnd).joinToString(" ") { "%02X".format(bytes[it].toInt() and 0xFF) }
+            val hex = (lineStart until lineEnd).joinToString(" ") {
+                if (isMasked(it)) "**" else "%02X".format(bytes[it].toInt() and 0xFF)
+            }
             append(hex.padEnd(hexWidth))
             append("  ")
             for (i in lineStart until lineEnd) {
                 val b = bytes[i].toInt() and 0xFF
-                append(if (b in 0x20..0x7E) b.toChar() else '.')
+                append(
+                    when {
+                        isMasked(i) -> '*'
+                        b in 0x20..0x7E -> b.toChar()
+                        else -> '.'
+                    },
+                )
             }
         }
     }
+
+    private fun isMasked(index: Int): Boolean = masked.any { index in it }
 
     /**
      * Inclusive character ranges in [text] covering bytes `[offset, offset + length)`: for each line

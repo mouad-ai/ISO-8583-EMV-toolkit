@@ -59,3 +59,8 @@ Choices made where SPEC.md leaves room, newest last.
 - **`DecodeNode` in `core`.** The tool window shows a display-neutral tree (id, name, value,
   offset, length). TLV and ISO 8583 results are adapted into it, which keeps the UI independent of
   the M1/M2 model types and keeps the offset lookup unit-testable.
+- **Hex view masks whole values.** The tree follows SPEC 6.8 (PAN keeps first 6 + last 4), but the
+  hex and ASCII columns hide every byte of a masked value, since partial masking of packed BCD
+  nibbles would be confusing. The reveal toggle lives in the panel only and is never persisted.
+- **`DecodeView` is the tool window's single core entry point** (bytes + mode + reveal in, tree +
+  masked ranges + problems out), so the Swing panel holds no decoding logic.

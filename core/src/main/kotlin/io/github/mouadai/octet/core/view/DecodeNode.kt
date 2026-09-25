@@ -11,6 +11,8 @@ data class DecodeNode(
     val offset: Int,
     val length: Int,
     val children: List<DecodeNode> = emptyList(),
+    /** Raw value bytes as hex, masked like [value] when the element is sensitive. */
+    val rawHex: String = "",
 ) {
     operator fun contains(byteOffset: Int): Boolean = byteOffset >= offset && byteOffset < offset + length
 

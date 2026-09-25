@@ -41,8 +41,44 @@ class OctetToolWindowTest : BasePlatformTestCase() {
         assertNull("Nothing is selected right after decoding", panel.tree.selectionPath)
 
         panel.hexView.caretPosition = 6 // first hex byte
-        assertEquals(0, panel.tree.selectionRows?.single())
+        assertEquals("9A", selectedNode(panel).id)
     }
+
+    fun testEmvTagsAreDecodedAndSensitiveBytesMasked() {
+        val panel = OctetDecodePanel()
+        panel.input.text = "9A03260925 5A084111111111111111"
+        panel.decode()
+
+        val root = (panel.treeModel.root as DefaultMutableTreeNode).userObject as DecodeNode
+        assertEquals(listOf("9A", "5A"), root.children.map { it.id })
+        assertEquals("411111******1111", root.children[1].value)
+        assertTrue(panel.hexView.text, panel.hexView.text.contains("5A 08 ** **"))
+
+        panel.revealCheckBox.doClick()
+        assertTrue(panel.hexView.text, panel.hexView.text.contains("5A 08 41 11"))
+    }
+
+    fun testTlvErrorsAreShownInTheStatus() {
+        val panel = OctetDecodePanel()
+        panel.input.text = "9A0526"
+        panel.decode()
+
+        assertTrue(panel.status.text, panel.status.text.contains("exceeds remaining"))
+    }
+
+    fun testRawModeShowsASingleNode() {
+        val panel = OctetDecodePanel()
+        panel.modeCombo.selectedIndex = 1
+        panel.input.text = "9A03260925"
+        panel.decode()
+
+        val root = (panel.treeModel.root as DefaultMutableTreeNode).userObject as DecodeNode
+        assertEquals("Input", root.id)
+        assertTrue(root.children.isEmpty())
+    }
+
+    private fun selectedNode(panel: OctetDecodePanel): DecodeNode =
+        (panel.tree.selectionPath!!.lastPathComponent as DefaultMutableTreeNode).userObject as DecodeNode
 
     fun testInvalidInputShowsAnError() {
         val panel = OctetDecodePanel()

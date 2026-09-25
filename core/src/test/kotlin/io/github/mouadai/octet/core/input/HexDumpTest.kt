@@ -81,4 +81,11 @@ class HexDumpTest {
         assertNull(dump.byteOffsetAt(secondLine + 12)) // hex padding past the last byte
         assertNull(dump.byteOffsetAt(10_000))
     }
+
+    @Test
+    fun `masked bytes are hidden in both columns`() {
+        val dump = HexDump(bytes(4), bytesPerLine = 4, masked = listOf(1..2))
+        assertEquals("0000  41 ** ** 44  A**D", dump.text)
+        assertEquals(listOf(9..13, 20..21), dump.highlightRanges(offset = 1, length = 2))
+    }
 }
