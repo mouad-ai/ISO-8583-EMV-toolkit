@@ -87,7 +87,7 @@ class DialectSchemaTest : BasePlatformTestCase() {
               "version": "1987",
               "mti": { "encoding": "ASCII" },
               "bitmap": { "encoding": "HEX_ASCII" },
-              "framing": [{ "type": "NONE" }, { "type": "LENGTH_2_BINARY" }],
+              "framing": [{ "type": "NONE" }, { "type": "TPDU", "prefix": "LENGTH_2_BINARY" }],
               "fields": {
                 "2": { "name": "Primary account number", "type": "n", "lengthType": "LLVAR", "maxLength": 19, "lengthEncoding": "ASCII", "sensitive": true },
                 "4": { "name": "Amount, transaction", "type": "n", "lengthType": "FIXED", "maxLength": 12, "padding": { "side": "LEFT", "char": "0" } },

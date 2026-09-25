@@ -134,7 +134,7 @@
       "maximum": 9999
     },
     "lengthEncoding": {
-      "description": "Encoding of the length prefix. Ignored for FIXED fields.",
+      "description": "Encoding of the length prefix. Ignored for FIXED fields. Defaults to ASCII.",
       "$ref": "#/definitions/encoding"
     },
     "dataEncoding": {
@@ -145,7 +145,8 @@
         "BCD_RIGHT_PAD",
         "EBCDIC",
         "BINARY"
-      ]
+      ],
+      "description": "Defaults to ASCII. For type b with ASCII or EBCDIC data, the value is hex text (2 characters per byte) and lengths count bytes."
     },
     "sensitive": {
       "description": "Mask the value in the UI and in copies (PAN, track data, PIN block...).",
@@ -210,20 +211,72 @@
           "description": "Header size in bytes; only for type HEADER.",
           "type": "integer",
           "minimum": 1
+        },
+        "prefix": {
+          "description": "Length prefix sent before the TPDU or header; only for types TPDU and HEADER.",
+          "enum": [
+            "LENGTH_2_BINARY",
+            "LENGTH_4_ASCII"
+          ]
         }
       },
-      "if": {
-        "properties": {
-          "type": {
-            "const": "HEADER"
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "HEADER"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "length"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "NONE",
+                  "LENGTH_2_BINARY",
+                  "LENGTH_4_ASCII"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "prefix"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "NONE",
+                  "LENGTH_2_BINARY",
+                  "LENGTH_4_ASCII",
+                  "TPDU"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "length"
+              ]
+            }
           }
         }
-      },
-      "then": {
-        "required": [
-          "length"
-        ]
-      }
+      ]
     },
     "field": {
       "type": "object",
@@ -470,6 +523,7 @@
                 "minimum": 1
               },
               "tagEncoding": {
+                "description": "Not yet supported by the decoder unless it matches the field's own character encoding.",
                 "$ref": "#/definitions/encoding"
               },
               "lengthLength": {
@@ -478,6 +532,7 @@
                 "minimum": 1
               },
               "lengthEncoding": {
+                "description": "Not yet supported by the decoder unless it matches the field's own character encoding.",
                 "$ref": "#/definitions/encoding"
               },
               "tags": {
@@ -499,7 +554,7 @@
             }
           },
           "then": {
-            "description": "A bitmap followed by the subfields it announces, numbered from 1.",
+            "description": "A bitmap followed by the subfields it announces, numbered from 1. Not yet supported by the decoder.",
             "additionalProperties": false,
             "required": [
               "bitmapLength",
@@ -552,6 +607,7 @@
           "minimum": 1
         },
         "type": {
+          "description": "Informational for now. Subfields are numbered by their 1-based position.",
           "$ref": "#/definitions/fieldType"
         },
         "sensitive": {
