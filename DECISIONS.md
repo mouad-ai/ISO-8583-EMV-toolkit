@@ -20,3 +20,15 @@ Choices made where SPEC.md leaves room, newest last.
 - **`buildSearchableOptions` disabled** until there is a settings page (M5+), to keep builds fast.
 - **`runIde` in CI.** CI cannot open an IDE window, so `OctetToolWindowTest` boots a headless IDE
   with the plugin loaded and checks the tool window is registered and its panel builds.
+
+## M3
+
+- **Input auto-detection order: hex, then base64, then raw ASCII.** Text valid as both hex and
+  base64 (e.g. `AAAA`) is read as hex, the common case for pasted dumps. Hex cleanup strips
+  whitespace, `0x` prefixes and commas, so `byte[]` literals paste directly. Odd-length hex falls
+  through to the next format in auto mode and is an explicit error when hex is forced.
+- **Raw ASCII input is taken byte-for-byte as ISO-8859-1**, falling back to UTF-8 only when the
+  text has characters above U+00FF.
+- **`DecodeNode` in `core`.** The tool window shows a display-neutral tree (id, name, value,
+  offset, length). TLV and ISO 8583 results are adapted into it, which keeps the UI independent of
+  the M1/M2 model types and keeps the offset lookup unit-testable.
