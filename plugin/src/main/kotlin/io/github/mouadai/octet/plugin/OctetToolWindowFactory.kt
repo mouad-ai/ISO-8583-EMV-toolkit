@@ -9,7 +9,7 @@ import com.intellij.ui.content.ContentFactory
 class OctetToolWindowFactory : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        val content = ContentFactory.getInstance().createContent(OctetToolWindowPanel.create(), null, false)
+        val content = ContentFactory.getInstance().createContent(OctetDecodePanel().component, null, false)
         toolWindow.contentManager.addContent(content)
     }
 }
