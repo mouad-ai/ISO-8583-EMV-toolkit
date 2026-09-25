@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Test and verify plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # IDE downloads for the plugin verifier need several GB.
+      - name: Free disk space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests
+        run: ./gradlew check --console=plain
+
+      - name: Build plugin
+        run: ./gradlew buildPlugin --console=plain
+
+      - name: Verify plugin
+        run: ./gradlew verifyPlugin --console=plain
+
+      - name: Upload test and verifier reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            */build/reports/
+            plugin/build/reports/pluginVerifier/
+          if-no-files-found: ignore
+
+      - name: Upload plugin zip
+        uses: actions/upload-artifact@v4
+        with:
+          name: octet-plugin
+          path: plugin/build/distributions/*.zip

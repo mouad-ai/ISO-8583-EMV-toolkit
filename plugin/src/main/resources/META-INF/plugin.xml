@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>io.github.mouadai.octet</id>
+    <name>Octet</name>
+    <vendor url="https://github.com/mouad-ai/ISO-8583-EMV-toolkit">mouad-ai</vendor>
+
+    <description><![CDATA[
+    Decode, build and diff ISO 8583 messages and EMV BER-TLV data (field 55 and more) without leaving your IDE.
+    <ul>
+      <li>100% offline: no network calls, no telemetry, sensitive data masked by default.</li>
+      <li>Works with your own message specs (dialects) for each processor.</li>
+    </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Octet"
+                    anchor="right"
+                    icon="/icons/octetToolWindow.svg"
+                    factoryClass="io.github.mouadai.octet.plugin.OctetToolWindowFactory"/>
+    </extensions>
+</idea-plugin>
