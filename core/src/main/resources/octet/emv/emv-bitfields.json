@@ -1,0 +1,144 @@
+{
+  "_comment": "Bit meanings for EMV bitfield tags, from the public EMV 4.x Books (Book 3 Annex C, Book 4 Annex A). Bytes are listed left to right (byte 1 first); bits are numbered 8 (most significant) to 1. Bits not listed are RFU.",
+  "flags": {
+    "82": {
+      "name": "Application Interchange Profile",
+      "bytes": [
+        { "label": "Byte 1", "bits": {
+          "7": "SDA supported",
+          "6": "DDA supported",
+          "5": "Cardholder verification is supported",
+          "4": "Terminal risk management is to be performed",
+          "3": "Issuer authentication is supported",
+          "1": "CDA supported"
+        } },
+        { "label": "Byte 2 (kernel specific)", "bits": {} }
+      ]
+    },
+    "95": {
+      "name": "Terminal Verification Results",
+      "bytes": [
+        { "label": "Byte 1 (offline data authentication)", "bits": {
+          "8": "Offline data authentication was not performed",
+          "7": "SDA failed",
+          "6": "ICC data missing",
+          "5": "Card appears on terminal exception file",
+          "4": "DDA failed",
+          "3": "CDA failed",
+          "2": "SDA selected"
+        } },
+        { "label": "Byte 2 (processing restrictions)", "bits": {
+          "8": "ICC and terminal have different application versions",
+          "7": "Expired application",
+          "6": "Application not yet effective",
+          "5": "Requested service not allowed for card product",
+          "4": "New card"
+        } },
+        { "label": "Byte 3 (cardholder verification)", "bits": {
+          "8": "Cardholder verification was not successful",
+          "7": "Unrecognised CVM",
+          "6": "PIN Try Limit exceeded",
+          "5": "PIN entry required and PIN pad not present or not working",
+          "4": "PIN entry required, PIN pad present, but PIN was not entered",
+          "3": "Online PIN entered"
+        } },
+        { "label": "Byte 4 (terminal risk management)", "bits": {
+          "8": "Transaction exceeds floor limit",
+          "7": "Lower consecutive offline limit exceeded",
+          "6": "Upper consecutive offline limit exceeded",
+          "5": "Transaction selected randomly for online processing",
+          "4": "Merchant forced transaction online"
+        } },
+        { "label": "Byte 5 (issuer processing)", "bits": {
+          "8": "Default TDOL used",
+          "7": "Issuer authentication failed",
+          "6": "Script processing failed before final GENERATE AC",
+          "5": "Script processing failed after final GENERATE AC"
+        } }
+      ]
+    },
+    "9B": {
+      "name": "Transaction Status Information",
+      "bytes": [
+        { "label": "Byte 1", "bits": {
+          "8": "Offline data authentication was performed",
+          "7": "Cardholder verification was performed",
+          "6": "Card risk management was performed",
+          "5": "Issuer authentication was performed",
+          "4": "Terminal risk management was performed",
+          "3": "Script processing was performed"
+        } },
+        { "label": "Byte 2", "bits": {} }
+      ]
+    },
+    "9F33": {
+      "name": "Terminal Capabilities",
+      "bytes": [
+        { "label": "Byte 1 (card data input capability)", "bits": {
+          "8": "Manual key entry",
+          "7": "Magnetic stripe",
+          "6": "IC with contacts"
+        } },
+        { "label": "Byte 2 (CVM capability)", "bits": {
+          "8": "Plaintext PIN for ICC verification",
+          "7": "Enciphered PIN for online verification",
+          "6": "Signature (paper)",
+          "5": "Enciphered PIN for offline verification",
+          "4": "No CVM required"
+        } },
+        { "label": "Byte 3 (security capability)", "bits": {
+          "8": "SDA",
+          "7": "DDA",
+          "6": "Card capture",
+          "4": "CDA"
+        } }
+      ]
+    }
+  },
+  "cvm": {
+    "_comment": "9F34 CVM Results: byte 1 = CVM performed (CV Rule byte 1), byte 2 = CVM condition, byte 3 = result. Codes are hex.",
+    "methods": {
+      "00": "Fail CVM processing",
+      "01": "Plaintext PIN verification performed by ICC",
+      "02": "Enciphered PIN verified online",
+      "03": "Plaintext PIN verification performed by ICC and signature (paper)",
+      "04": "Enciphered PIN verification performed by ICC",
+      "05": "Enciphered PIN verification performed by ICC and signature (paper)",
+      "1E": "Signature (paper)",
+      "1F": "No CVM required",
+      "3F": "No CVM performed"
+    },
+    "conditions": {
+      "00": "Always",
+      "01": "If unattended cash",
+      "02": "If not unattended cash and not manual cash and not purchase with cashback",
+      "03": "If terminal supports the CVM",
+      "04": "If manual cash",
+      "05": "If purchase with cashback",
+      "06": "If transaction is in the application currency and is under X value",
+      "07": "If transaction is in the application currency and is over X value",
+      "08": "If transaction is in the application currency and is under Y value",
+      "09": "If transaction is in the application currency and is over Y value"
+    },
+    "results": {
+      "00": "Unknown",
+      "01": "Failed",
+      "02": "Successful"
+    }
+  },
+  "cid": {
+    "_comment": "9F27 Cryptogram Information Data. Type = bits 8-7, advice = bit 4, reason = bits 3-1.",
+    "types": {
+      "0": "AAC (transaction declined)",
+      "1": "TC (transaction approved offline)",
+      "2": "ARQC (online authorisation requested)",
+      "3": "RFU"
+    },
+    "reasons": {
+      "0": "No information given",
+      "1": "Service not allowed",
+      "2": "PIN Try Limit exceeded",
+      "3": "Issuer authentication failed"
+    }
+  }
+}
