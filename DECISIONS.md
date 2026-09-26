@@ -190,3 +190,14 @@ Choices made where SPEC.md leaves room, newest last.
 - `core/iso/DialectCatalog` merges built-ins with dialect file texts, so load order, labels and `extends` between user files are unit-tested without the IDE. The plugin only reads files from `DialectFileService`.
 - A dialect file can extend another dialect file by `id`, not only a built-in. Duplicate ids: the first file wins as a base.
 - Broken files are skipped with a status-line message instead of a popup, so a half-typed file being edited doesn't nag.
+## M8 — Diff
+
+- **Diff runs on the display tree (`DecodeNode`)**, not on decoder-specific models, so one diff covers
+  ISO 8583 fields, subfields and EMV tags, and compares values exactly as the user sees them.
+- **Matching**: siblings are matched by id; the n-th repeat of an id is matched with the n-th repeat
+  on the other side (key `id#n`). Reordered elements count as unchanged. The result keeps the right
+  side's order; a removed element is shown right after its left-side predecessor.
+- **Counting**: added and removed subtrees count once at their top; a parent counts as changed only
+  when its own value differs, so the summary reflects what the user would fix.
+- **Masking**: both sides are decoded masked, so the tree and the copied report never contain clear
+  sensitive values unless revealed upstream.
