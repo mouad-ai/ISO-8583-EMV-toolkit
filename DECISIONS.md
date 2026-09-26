@@ -62,6 +62,13 @@ Choices made where SPEC.md leaves room, newest last.
 - **Hex view masks whole values.** The tree follows SPEC 6.8 (PAN keeps first 6 + last 4), but the
   hex and ASCII columns hide every byte of a masked value, since partial masking of packed BCD
   nibbles would be confusing. The reveal toggle lives in the panel only and is never persisted.
+- **Field 55 inside ISO 8583 is re-read by the M1 `EmvDecoder`** for formatted values and bits.
+  In hex-text dialects each TLV byte is two characters in the message, so tag offsets are scaled
+  by `valueLength / tlvBytes`; if the value is not clean hex, M2's raw children are shown instead.
+- **ISO field masking by field number**: 2 keeps first 6 + last 4, 35 uses the track 2 rule, any
+  other field or subfield the dialect marks sensitive is fully masked.
+- **Pasted ISO text made only of hex digits is read as hex** by input auto-detection; pick "ASCII"
+  as the input format to decode it as characters.
 - **`DecodeView` is the tool window's single core entry point** (bytes + mode + reveal in, tree +
   masked ranges + problems out), so the Swing panel holds no decoding logic.
 

@@ -22,4 +22,11 @@ data class DecodeNode(
         val deeper = children.firstNotNullOfOrNull { it.pathAt(byteOffset) }
         return listOf(this) + deeper.orEmpty()
     }
+
+    /** Copy with offsets moved to `delta + offset * scale` and lengths multiplied by [scale], recursively. */
+    fun relocated(delta: Int, scale: Int = 1): DecodeNode = copy(
+        offset = delta + offset * scale,
+        length = length * scale,
+        children = children.map { it.relocated(delta, scale) },
+    )
 }

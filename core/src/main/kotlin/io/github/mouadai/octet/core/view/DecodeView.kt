@@ -1,9 +1,13 @@
 package io.github.mouadai.octet.core.view
 
 import io.github.mouadai.octet.core.emv.EmvDecoder
+import io.github.mouadai.octet.core.iso.Dialect
+import io.github.mouadai.octet.core.iso.FramingSpec
+import io.github.mouadai.octet.core.iso.IsoDecoder
 
 /** What the input bytes should be decoded as. */
 enum class DecodeMode(val label: String) {
+    ISO_8583("ISO 8583"),
     EMV_TLV("EMV TLV"),
     RAW("Raw bytes"),
 }
@@ -21,8 +25,26 @@ data class DecodeViewModel(
 object DecodeView {
 
     private val emvDecoder = EmvDecoder()
+    private val isoDecoder = IsoDecoder()
+    private val isoTree = IsoTree(emvDecoder)
 
-    fun decode(bytes: ByteArray, mode: DecodeMode, reveal: Boolean): DecodeViewModel = when (mode) {
+    /**
+     * @param dialect required for [DecodeMode.ISO_8583]
+     * @param framing null to auto-detect among the dialect's framings
+     */
+    fun decode(
+        bytes: ByteArray,
+        mode: DecodeMode,
+        reveal: Boolean,
+        dialect: Dialect? = null,
+        framing: FramingSpec? = null,
+    ): DecodeViewModel = when (mode) {
+        DecodeMode.ISO_8583 -> {
+            requireNotNull(dialect) { "ISO 8583 decoding needs a dialect" }
+            val result = isoDecoder.decode(bytes, dialect, framing)
+            val tree = isoTree.build(result, reveal)
+            DecodeViewModel(tree.root, tree.maskedRanges, result.errors.map { it.message })
+        }
         DecodeMode.RAW -> DecodeViewModel(
             root = DecodeNode("Input", "${bytes.size} bytes", "", offset = 0, length = bytes.size),
             maskedRanges = emptyList(),

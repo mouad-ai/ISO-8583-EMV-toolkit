@@ -19,6 +19,8 @@ import io.github.mouadai.octet.core.input.HexDump
 import io.github.mouadai.octet.core.input.InputDecoder
 import io.github.mouadai.octet.core.input.InputFormat
 import io.github.mouadai.octet.core.input.InputResult
+import io.github.mouadai.octet.core.iso.BuiltinDialects
+import io.github.mouadai.octet.core.iso.Dialect
 import io.github.mouadai.octet.core.view.DecodeMode
 import io.github.mouadai.octet.core.view.DecodeNode
 import io.github.mouadai.octet.core.view.DecodeView
@@ -51,6 +53,10 @@ class OctetDecodePanel {
     }
     private val formatCombo = ComboBox(formats.map { it.first }.toTypedArray())
     internal val modeCombo = ComboBox(DecodeMode.entries.map { it.label }.toTypedArray())
+    // Built-in dialects for now; project and user dialect folders (M5) plug in here.
+    private val dialects: List<Dialect> = BuiltinDialects.all
+    internal val dialectCombo = ComboBox(dialects.map { it.name }.toTypedArray())
+    internal val framingCombo = ComboBox<String>()
     internal val revealCheckBox = JBCheckBox("Reveal sensitive values")
     internal val status = JBLabel()
     internal val treeModel = DefaultTreeModel(null)
@@ -75,6 +81,11 @@ class OctetDecodePanel {
             label("Decode as:")
             cell(modeCombo)
             button("Decode") { decode() }
+        }
+        row("Dialect:") {
+            cell(dialectCombo)
+            label("Framing:")
+            cell(framingCombo)
         }
         row {
             cell(JBScrollPane(input)).align(Align.FILL)
@@ -101,6 +112,10 @@ class OctetDecodePanel {
             highlight(node as? DecodeNode)
         }
         revealCheckBox.addActionListener { lastInput?.let(::render) }
+        modeCombo.addActionListener { updateIsoControls() }
+        dialectCombo.addActionListener { updateFramings() }
+        updateFramings()
+        updateIsoControls()
         hexView.addCaretListener { event ->
             if (!updatingHexView) selectNodeAtByte(dump?.byteOffsetAt(event.dot))
         }
@@ -123,8 +138,13 @@ class OctetDecodePanel {
 
     private fun render(input: InputResult.Success) {
         val bytes = input.bytes
-        val mode = DecodeMode.entries[modeCombo.selectedIndex.coerceAtLeast(0)]
-        val view = DecodeView.decode(bytes, mode, reveal = revealCheckBox.isSelected)
+        val view = DecodeView.decode(
+            bytes,
+            selectedMode(),
+            reveal = revealCheckBox.isSelected,
+            dialect = selectedDialect(),
+            framing = selectedDialect().framings.getOrNull(framingCombo.selectedIndex - 1),
+        )
         show(view.root, HexDump(bytes, masked = view.maskedRanges))
         TreeUtil.expandAll(tree)
         val read = "Read ${bytes.size} bytes as ${input.format.name.lowercase()}."
@@ -133,6 +153,32 @@ class OctetDecodePanel {
             1 -> showStatus("$read ${view.problems.single()}", isError = true)
             else -> showStatus("$read ${view.problems.first()} (+${view.problems.size - 1} more)", isError = true)
         }
+    }
+
+    internal fun selectFormat(format: InputFormat) {
+        formatCombo.selectedIndex = formats.indexOfFirst { it.second == format }
+    }
+
+    internal fun selectMode(mode: DecodeMode) {
+        modeCombo.selectedIndex = mode.ordinal
+    }
+
+    private fun selectedMode(): DecodeMode = DecodeMode.entries[modeCombo.selectedIndex.coerceAtLeast(0)]
+
+    private fun selectedDialect(): Dialect = dialects[dialectCombo.selectedIndex.coerceAtLeast(0)]
+
+    /** Framing choices: "Auto" (index 0) then the selected dialect's own framings. */
+    private fun updateFramings() {
+        framingCombo.removeAllItems()
+        framingCombo.addItem("Auto")
+        selectedDialect().framings.forEach { framingCombo.addItem(it.label) }
+        framingCombo.selectedIndex = 0
+    }
+
+    private fun updateIsoControls() {
+        val iso = selectedMode() == DecodeMode.ISO_8583
+        dialectCombo.isEnabled = iso
+        framingCombo.isEnabled = iso
     }
 
     private fun showStatus(text: String, isError: Boolean) {

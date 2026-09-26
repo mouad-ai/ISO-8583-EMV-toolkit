@@ -19,14 +19,16 @@
 - Subfields: fixed slices, private TLV with character tags, and BER-TLV for field 55 via the M1 parser.
 - Best-effort decoding with byte offsets on every element and precise errors (e.g. "Field 35 (Track 2 data): LLVAR length 34 exceeds remaining 12 bytes at offset 0x4F.").
 - Encoder that re-encodes decoded messages byte-identically; property-based round-trip, truncation and corruption tests.
-### M3 — Decode tool window (in progress)
+### M3 — Decode tool window
 - Input detection in `core`: hex (spaces, newlines, `0x`, commas allowed), base64, or raw ASCII, with a manual override.
 - Hex dump layout in `core` with byte-offset ↔ text-position mapping.
 - Tool window: input area, format selector, tree and hex view with two-way highlighting.
 - "Decode as EMV TLV" (default) shows every tag with name, formatted value, raw hex, set bits and DOL entries, fully expanded.
 - Sensitive tags are masked in the tree and in the hex view; a session-only "Reveal sensitive values" toggle shows them.
 - TLV parse errors are shown under the input with their offset.
-- ISO 8583 decoding and the dialect selector follow once M2 lands.
+- "Decode as ISO 8583" (default) with a dialect selector (the three built-in dialects) and a framing selector (auto by default): framing, MTI with its meaning, bitmap, and every field with subfields.
+- Field 55 inside an ISO message expands into formatted EMV tags located at their exact bytes, in both binary and hex-text dialects.
+- PAN (first 6 + last 4), track 2 and other sensitive fields are masked in the tree and hex view.
 
 ### M0 — Scaffold
 - Gradle multi-module build: `core` (pure Kotlin/JVM, JUnit 5) and `plugin` (IntelliJ Platform Gradle Plugin 2.x).
