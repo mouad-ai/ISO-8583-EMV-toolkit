@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### M8 — Diff
+- `MessageDiff` in `core`: structural diff of two decoded messages (ISO 8583 fields or EMV tags), matched by id, with repeated tags matched by occurrence and reordering tolerated.
+- `DiffReport`: plain-text list of added, removed and changed elements with their paths.
+- Diff tab: paste two messages, see one merged tree with changes highlighted, copy the report.
+
 ### M5 — Dialect authoring (in progress)
 - JSON Schema for dialect files, including processor overrides (`extends`, partial fields, `remove`).
 - Autocomplete and validation for `.octet/dialects/*.json` and user dialect files (needs the bundled JSON plugin).
