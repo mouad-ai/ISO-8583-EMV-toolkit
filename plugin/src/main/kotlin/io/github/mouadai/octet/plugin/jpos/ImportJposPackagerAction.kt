@@ -16,6 +16,8 @@ import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.openapi.vfs.VirtualFile
 import io.github.mouadai.octet.core.jpos.JposImportResult
 import io.github.mouadai.octet.core.jpos.JposPackagerImporter
+import io.github.mouadai.octet.plugin.licensing.OctetLicense
+import io.github.mouadai.octet.plugin.licensing.PaidFeature
 
 /** Tools | Import jPOS Packager: converts a GenericPackager XML file into a project dialect (SPEC 7, M6). */
 class ImportJposPackagerAction : AnAction() {
@@ -28,6 +30,10 @@ class ImportJposPackagerAction : AnAction() {
 
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
+        if (!OctetLicense.isEnabled(PaidFeature.JPOS_IMPORT)) {
+            OctetLicense.requestLicense(PaidFeature.JPOS_IMPORT)
+            return
+        }
         val descriptor = FileChooserDescriptor(true, false, false, false, false, false)
             .withTitle(TITLE)
             .withDescription("Choose a jPOS GenericPackager XML file.")

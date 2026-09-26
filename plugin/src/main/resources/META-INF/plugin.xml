@@ -28,6 +28,7 @@
                                  id="io.github.mouadai.octet.settings"
                                  displayName="Octet"
                                  instance="io.github.mouadai.octet.plugin.OctetConfigurable"/>
+        <editorNotificationProvider implementation="io.github.mouadai.octet.plugin.dialect.DialectFileNotificationProvider"/>
     </extensions>
 
     <actions>
@@ -54,5 +55,7 @@
     <projectListeners>
         <listener class="io.github.mouadai.octet.plugin.dialect.DialectVfsListener"
                   topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+        <listener class="io.github.mouadai.octet.plugin.dialect.DialectBannerRefresher"
+                  topic="io.github.mouadai.octet.plugin.dialect.DialectsChangedListener"/>
     </projectListeners>
 </idea-plugin>
