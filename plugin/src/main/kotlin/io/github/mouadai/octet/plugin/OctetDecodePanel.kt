@@ -6,6 +6,7 @@ import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBColor
 import com.intellij.ui.JBSplitter
 import com.intellij.ui.SimpleTextAttributes
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
@@ -13,11 +14,16 @@ import com.intellij.ui.dsl.builder.Align
 import com.intellij.ui.dsl.builder.panel
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.UIUtil
+import com.intellij.util.ui.tree.TreeUtil
 import io.github.mouadai.octet.core.input.HexDump
 import io.github.mouadai.octet.core.input.InputDecoder
 import io.github.mouadai.octet.core.input.InputFormat
 import io.github.mouadai.octet.core.input.InputResult
+import io.github.mouadai.octet.core.iso.BuiltinDialects
+import io.github.mouadai.octet.core.iso.Dialect
+import io.github.mouadai.octet.core.view.DecodeMode
 import io.github.mouadai.octet.core.view.DecodeNode
+import io.github.mouadai.octet.core.view.DecodeView
 import java.awt.Color
 import java.awt.Font
 import javax.swing.JTree
@@ -46,6 +52,12 @@ class OctetDecodePanel {
         emptyText.text = "Paste hex, base64 or raw ASCII"
     }
     private val formatCombo = ComboBox(formats.map { it.first }.toTypedArray())
+    internal val modeCombo = ComboBox(DecodeMode.entries.map { it.label }.toTypedArray())
+    // Built-in dialects for now; project and user dialect folders (M5) plug in here.
+    private val dialects: List<Dialect> = BuiltinDialects.all
+    internal val dialectCombo = ComboBox(dialects.map { it.name }.toTypedArray())
+    internal val framingCombo = ComboBox<String>()
+    internal val revealCheckBox = JBCheckBox("Reveal sensitive values")
     internal val status = JBLabel()
     internal val treeModel = DefaultTreeModel(null)
     internal val tree = Tree(treeModel).apply {
@@ -61,17 +73,29 @@ class OctetDecodePanel {
     private var root: DecodeNode? = null
     private var dump: HexDump? = null
     private var updatingHexView = false
+    private var lastInput: InputResult.Success? = null
 
     val component: DialogPanel = panel {
-        row("Format:") {
+        row("Input:") {
             cell(formatCombo)
+            label("Decode as:")
+            cell(modeCombo)
             button("Decode") { decode() }
+        }
+        row("Dialect:") {
+            cell(dialectCombo)
+            label("Framing:")
+            cell(framingCombo)
         }
         row {
             cell(JBScrollPane(input)).align(Align.FILL)
         }.resizableRow()
         row {
             cell(status)
+        }
+        row {
+            // Session-only: never persisted, so every new tool window starts masked (SPEC 6.8).
+            cell(revealCheckBox)
         }
         row {
             val splitter = JBSplitter(false, 0.5f).apply {
@@ -87,6 +111,11 @@ class OctetDecodePanel {
             val node = (event.newLeadSelectionPath?.lastPathComponent as? DefaultMutableTreeNode)?.userObject
             highlight(node as? DecodeNode)
         }
+        revealCheckBox.addActionListener { lastInput?.let(::render) }
+        modeCombo.addActionListener { updateIsoControls() }
+        dialectCombo.addActionListener { updateFramings() }
+        updateFramings()
+        updateIsoControls()
         hexView.addCaretListener { event ->
             if (!updatingHexView) selectNodeAtByte(dump?.byteOffsetAt(event.dot))
         }
@@ -96,19 +125,73 @@ class OctetDecodePanel {
         val format = formats[formatCombo.selectedIndex.coerceAtLeast(0)].second
         when (val result = InputDecoder.decode(input.text, format)) {
             is InputResult.Failure -> {
+                lastInput = null
                 show(null, null)
-                status.foreground = UIUtil.getErrorForeground()
-                status.text = result.message
+                showStatus(result.message, isError = true)
             }
             is InputResult.Success -> {
-                val bytes = result.bytes
-                // Structured ISO 8583 and EMV TLV nodes replace this single node once the core decoders land.
-                val node = DecodeNode("Input", "${bytes.size} bytes", result.format.name, offset = 0, length = bytes.size)
-                show(node, HexDump(bytes))
-                status.foreground = UIUtil.getContextHelpForeground()
-                status.text = "Read ${bytes.size} bytes as ${result.format.name.lowercase()}."
+                lastInput = result
+                render(result)
             }
         }
+    }
+
+    private fun render(input: InputResult.Success) {
+        val bytes = input.bytes
+        val view = DecodeView.decode(
+            bytes,
+            selectedMode(),
+            reveal = revealCheckBox.isSelected,
+            dialect = selectedDialect(),
+            framing = selectedDialect().framings.getOrNull(framingCombo.selectedIndex - 1),
+        )
+        show(view.root, HexDump(bytes, masked = view.maskedRanges))
+        TreeUtil.expandAll(tree)
+        val read = "Read ${bytes.size} bytes as ${input.format.name.lowercase()}."
+        when (view.problems.size) {
+            0 -> showStatus(read, isError = false)
+            1 -> showStatus("$read ${view.problems.single()}", isError = true)
+            else -> showStatus("$read ${view.problems.first()} (+${view.problems.size - 1} more)", isError = true)
+        }
+    }
+
+    /** Decodes [text] as if pasted, with auto-detected input format. [mode] null keeps the current mode. */
+    fun decodeText(text: String, mode: DecodeMode?) {
+        selectFormat(InputFormat.AUTO)
+        mode?.let(::selectMode)
+        input.text = text
+        decode()
+    }
+
+    internal fun selectFormat(format: InputFormat) {
+        formatCombo.selectedIndex = formats.indexOfFirst { it.second == format }
+    }
+
+    internal fun selectMode(mode: DecodeMode) {
+        modeCombo.selectedIndex = mode.ordinal
+    }
+
+    private fun selectedMode(): DecodeMode = DecodeMode.entries[modeCombo.selectedIndex.coerceAtLeast(0)]
+
+    private fun selectedDialect(): Dialect = dialects[dialectCombo.selectedIndex.coerceAtLeast(0)]
+
+    /** Framing choices: "Auto" (index 0) then the selected dialect's own framings. */
+    private fun updateFramings() {
+        framingCombo.removeAllItems()
+        framingCombo.addItem("Auto")
+        selectedDialect().framings.forEach { framingCombo.addItem(it.label) }
+        framingCombo.selectedIndex = 0
+    }
+
+    private fun updateIsoControls() {
+        val iso = selectedMode() == DecodeMode.ISO_8583
+        dialectCombo.isEnabled = iso
+        framingCombo.isEnabled = iso
+    }
+
+    private fun showStatus(text: String, isError: Boolean) {
+        status.foreground = if (isError) UIUtil.getErrorForeground() else UIUtil.getContextHelpForeground()
+        status.text = text
     }
 
     private fun show(node: DecodeNode?, newDump: HexDump?) {
@@ -162,7 +245,10 @@ class OctetDecodePanel {
             val node = (value as? DefaultMutableTreeNode)?.userObject as? DecodeNode ?: return
             append(node.id, SimpleTextAttributes.REGULAR_BOLD_ATTRIBUTES)
             if (node.name.isNotEmpty()) append("  ${node.name}")
-            if (node.value.isNotEmpty()) append("  ${node.value}", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+            if (node.value.isNotEmpty()) append("  ${node.value}")
+            if (node.rawHex.isNotEmpty() && node.rawHex != node.value) {
+                append("  ${node.rawHex}", SimpleTextAttributes.GRAYED_ATTRIBUTES)
+            }
         }
     }
 

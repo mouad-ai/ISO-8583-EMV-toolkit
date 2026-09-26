@@ -2,6 +2,8 @@ package io.github.mouadai.octet.plugin
 
 import com.intellij.openapi.wm.ToolWindowEP
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import io.github.mouadai.octet.core.input.InputFormat
+import io.github.mouadai.octet.core.view.DecodeMode
 import io.github.mouadai.octet.core.view.DecodeNode
 import javax.swing.tree.DefaultMutableTreeNode
 
@@ -16,6 +18,7 @@ class OctetToolWindowTest : BasePlatformTestCase() {
 
     fun testDecodeShowsTreeAndHexView() {
         val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
         panel.input.text = "9F02 06 000000001000 5F2A 02 0504"
         panel.decode()
 
@@ -27,6 +30,7 @@ class OctetToolWindowTest : BasePlatformTestCase() {
 
     fun testSelectingTheRootHighlightsItsBytes() {
         val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
         panel.input.text = "9A03260925"
         panel.decode()
 
@@ -36,16 +40,77 @@ class OctetToolWindowTest : BasePlatformTestCase() {
 
     fun testClickingAByteSelectsItsNode() {
         val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
         panel.input.text = "9A03260925"
         panel.decode()
         assertNull("Nothing is selected right after decoding", panel.tree.selectionPath)
 
         panel.hexView.caretPosition = 6 // first hex byte
-        assertEquals(0, panel.tree.selectionRows?.single())
+        assertEquals("9A", selectedNode(panel).id)
     }
+
+    fun testEmvTagsAreDecodedAndSensitiveBytesMasked() {
+        val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
+        panel.input.text = "9A03260925 5A084111111111111111"
+        panel.decode()
+
+        val root = (panel.treeModel.root as DefaultMutableTreeNode).userObject as DecodeNode
+        assertEquals(listOf("9A", "5A"), root.children.map { it.id })
+        assertEquals("411111******1111", root.children[1].value)
+        assertTrue(panel.hexView.text, panel.hexView.text.contains("5A 08 ** **"))
+
+        panel.revealCheckBox.doClick()
+        assertTrue(panel.hexView.text, panel.hexView.text.contains("5A 08 41 11"))
+    }
+
+    fun testTlvErrorsAreShownInTheStatus() {
+        val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
+        panel.input.text = "9A0526"
+        panel.decode()
+
+        assertTrue(panel.status.text, panel.status.text.contains("exceeds remaining"))
+    }
+
+    fun testRawModeShowsASingleNode() {
+        val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.RAW)
+        panel.input.text = "9A03260925"
+        panel.decode()
+
+        val root = (panel.treeModel.root as DefaultMutableTreeNode).userObject as DecodeNode
+        assertEquals("Input", root.id)
+        assertTrue(root.children.isEmpty())
+    }
+
+    fun testIso8583ModeIsTheDefaultAndDecodesWithTheSelectedDialect() {
+        val panel = OctetDecodePanel()
+        // 1987 ASCII 0800 network management request: fields 7, 11, 70 (hand-crafted, fake values).
+        panel.selectFormat(InputFormat.ASCII)
+        panel.input.text = "0800" + "8220000000000000" + "0400000000000000" + "0925221000" + "123456" + "301"
+        panel.decode()
+
+        val root = (panel.treeModel.root as DefaultMutableTreeNode).userObject as DecodeNode
+        assertEquals("ISO 8583", root.id)
+        assertEquals(listOf("MTI", "Bitmap", "DE 7", "DE 11", "DE 70"), root.children.map { it.id })
+        assertTrue(panel.dialectCombo.isEnabled)
+    }
+
+    fun testDialectControlsAreDisabledOutsideIsoMode() {
+        val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
+        assertFalse(panel.dialectCombo.isEnabled)
+        assertFalse(panel.framingCombo.isEnabled)
+        assertEquals("Auto", panel.framingCombo.getItemAt(0))
+    }
+
+    private fun selectedNode(panel: OctetDecodePanel): DecodeNode =
+        (panel.tree.selectionPath!!.lastPathComponent as DefaultMutableTreeNode).userObject as DecodeNode
 
     fun testInvalidInputShowsAnError() {
         val panel = OctetDecodePanel()
+        panel.selectMode(DecodeMode.EMV_TLV)
         panel.input.text = "   "
         panel.decode()
 
