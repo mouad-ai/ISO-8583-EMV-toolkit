@@ -6,10 +6,14 @@ import com.intellij.execution.filters.HyperlinkInfo
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import io.github.mouadai.octet.core.input.HexRuns
+import io.github.mouadai.octet.plugin.licensing.OctetLicense
+import io.github.mouadai.octet.plugin.licensing.PaidFeature
 
 class OctetConsoleFilterProvider : ConsoleFilterProvider {
     override fun getDefaultFilters(project: Project): Array<Filter> =
-        arrayOf(HexDecodeConsoleFilter { OctetSettings.getInstance().state.consoleFilterEnabled })
+        arrayOf(HexDecodeConsoleFilter {
+            OctetSettings.getInstance().state.consoleFilterEnabled && OctetLicense.isEnabled(PaidFeature.CONSOLE_FILTER)
+        })
 }
 
 /**

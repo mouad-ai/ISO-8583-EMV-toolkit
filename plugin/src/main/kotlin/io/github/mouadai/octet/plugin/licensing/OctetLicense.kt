@@ -39,10 +39,27 @@ object OctetLicense {
 
     enum class State { LICENSED, UNLICENSED, UNKNOWN }
 
-    /** [State.UNKNOWN] while the IDE's licensing has not started yet (early startup, headless runs). */
+    private const val CACHE_MILLIS = 60_000L
+
+    @Volatile
+    private var cached: Pair<State, Long>? = null
+
+    /**
+     * [State.UNKNOWN] while the IDE's licensing has not started yet (early startup, headless runs).
+     * A known state is cached for a minute, since the console filter asks for every output line.
+     */
     fun state(): State {
+        val now = System.currentTimeMillis()
+        cached?.let { (state, at) -> if (now - at < CACHE_MILLIS) return state }
         val facade = LicensingFacade.getInstance() ?: return State.UNKNOWN
-        return if (LicenseStampVerifier.isValid(facade.getConfirmationStamp(PRODUCT_CODE))) State.LICENSED else State.UNLICENSED
+        val state = if (LicenseStampVerifier.isValid(facade.getConfirmationStamp(PRODUCT_CODE))) State.LICENSED else State.UNLICENSED
+        cached = state to now
+        return state
+    }
+
+    /** Forgets the cached state, e.g. after the user entered a license. */
+    fun invalidate() {
+        cached = null
     }
 
     /** Unknown counts as enabled, so a slow licensing start never locks a paying user out. */
