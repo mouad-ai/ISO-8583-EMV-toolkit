@@ -1,0 +1,621 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/mouad-ai/ISO-8583-EMV-toolkit/dialect.schema.json",
+  "title": "Octet ISO 8583 dialect",
+  "description": "One ISO 8583 message layout. A dialect either defines every field itself, or names a base dialect in \"extends\" and lists only the fields it changes.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "fields"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "description": "Unique id, used by other dialects in \"extends\". Lowercase letters, digits, '.', '_' and '-'.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "name": {
+      "description": "Display name.",
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "extends": {
+      "description": "Id of the base dialect. Settings and fields not listed here are inherited from it.",
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "version": {
+      "description": "ISO 8583 version the layout follows.",
+      "enum": [
+        "1987",
+        "1993",
+        "2003"
+      ]
+    },
+    "mti": {
+      "$ref": "#/definitions/mti"
+    },
+    "bitmap": {
+      "$ref": "#/definitions/bitmap"
+    },
+    "framing": {
+      "description": "Message prefixes to try, in order. Auto-detection picks the first that parses cleanly.",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/framing"
+      }
+    },
+    "fields": {
+      "description": "Field definitions keyed by field number (2-192).",
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/definitions/fieldNumber"
+      }
+    }
+  },
+  "if": {
+    "required": [
+      "extends"
+    ]
+  },
+  "then": {
+    "properties": {
+      "fields": {
+        "additionalProperties": {
+          "$ref": "#/definitions/fieldOverride"
+        }
+      }
+    }
+  },
+  "else": {
+    "required": [
+      "version",
+      "mti",
+      "bitmap"
+    ],
+    "properties": {
+      "fields": {
+        "additionalProperties": {
+          "$ref": "#/definitions/field"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "fieldNumber": {
+      "type": "string",
+      "pattern": "^([2-9]|[1-9][0-9]|1[0-8][0-9]|19[0-2])$"
+    },
+    "encoding": {
+      "enum": [
+        "ASCII",
+        "BCD",
+        "EBCDIC",
+        "BINARY"
+      ]
+    },
+    "fieldName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fieldType": {
+      "description": "ISO 8583 content type.",
+      "enum": [
+        "n",
+        "a",
+        "an",
+        "ans",
+        "b",
+        "z",
+        "xn",
+        "custom"
+      ]
+    },
+    "lengthType": {
+      "enum": [
+        "FIXED",
+        "LLVAR",
+        "LLLVAR",
+        "LLLLVAR"
+      ]
+    },
+    "maxLength": {
+      "description": "Length for FIXED fields, maximum for variable ones. Counted in digits, characters or bytes depending on type.",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999
+    },
+    "lengthEncoding": {
+      "description": "Encoding of the length prefix. Ignored for FIXED fields. Defaults to ASCII.",
+      "$ref": "#/definitions/encoding"
+    },
+    "dataEncoding": {
+      "enum": [
+        "ASCII",
+        "BCD",
+        "BCD_LEFT_PAD",
+        "BCD_RIGHT_PAD",
+        "EBCDIC",
+        "BINARY"
+      ],
+      "description": "Defaults to ASCII. For type b with ASCII or EBCDIC data, the value is hex text (2 characters per byte) and lengths count bytes."
+    },
+    "sensitive": {
+      "description": "Mask the value in the UI and in copies (PAN, track data, PIN block...).",
+      "type": "boolean"
+    },
+    "mti": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding"
+      ],
+      "properties": {
+        "encoding": {
+          "description": "How the 4 MTI digits are encoded.",
+          "enum": [
+            "ASCII",
+            "BCD",
+            "EBCDIC"
+          ]
+        }
+      }
+    },
+    "bitmap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "encoding"
+      ],
+      "properties": {
+        "encoding": {
+          "description": "BINARY: 8 raw bytes per bitmap. HEX_ASCII: 16 hex characters. HEX_EBCDIC: 16 hex characters in EBCDIC.",
+          "enum": [
+            "BINARY",
+            "HEX_ASCII",
+            "HEX_EBCDIC"
+          ]
+        },
+        "tertiary": {
+          "description": "Whether bit 65 announces a tertiary bitmap (fields 129-192).",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "framing": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "NONE",
+            "LENGTH_2_BINARY",
+            "LENGTH_4_ASCII",
+            "TPDU",
+            "HEADER"
+          ]
+        },
+        "length": {
+          "description": "Header size in bytes; only for type HEADER.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "prefix": {
+          "description": "Length prefix sent before the TPDU or header; only for types TPDU and HEADER.",
+          "enum": [
+            "LENGTH_2_BINARY",
+            "LENGTH_4_ASCII"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "HEADER"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "length"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "NONE",
+                  "LENGTH_2_BINARY",
+                  "LENGTH_4_ASCII"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "prefix"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": [
+                  "NONE",
+                  "LENGTH_2_BINARY",
+                  "LENGTH_4_ASCII",
+                  "TPDU"
+                ]
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "length"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "lengthType",
+        "maxLength"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/fieldName"
+        },
+        "type": {
+          "$ref": "#/definitions/fieldType"
+        },
+        "lengthType": {
+          "$ref": "#/definitions/lengthType"
+        },
+        "maxLength": {
+          "$ref": "#/definitions/maxLength"
+        },
+        "lengthEncoding": {
+          "$ref": "#/definitions/lengthEncoding"
+        },
+        "dataEncoding": {
+          "$ref": "#/definitions/dataEncoding"
+        },
+        "padding": {
+          "$ref": "#/definitions/padding"
+        },
+        "sensitive": {
+          "$ref": "#/definitions/sensitive"
+        },
+        "subfields": {
+          "$ref": "#/definitions/subfields"
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "#/definitions/variableLengthLimits"
+        }
+      ]
+    },
+    "fieldOverride": {
+      "description": "Only the properties listed here replace the base dialect's field. A field the base does not have must be complete. \"remove\": true drops the field.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "remove": {
+          "description": "Drop this field from the base dialect.",
+          "const": true
+        },
+        "name": {
+          "$ref": "#/definitions/fieldName"
+        },
+        "type": {
+          "$ref": "#/definitions/fieldType"
+        },
+        "lengthType": {
+          "$ref": "#/definitions/lengthType"
+        },
+        "maxLength": {
+          "$ref": "#/definitions/maxLength"
+        },
+        "lengthEncoding": {
+          "$ref": "#/definitions/lengthEncoding"
+        },
+        "dataEncoding": {
+          "$ref": "#/definitions/dataEncoding"
+        },
+        "padding": {
+          "$ref": "#/definitions/padding"
+        },
+        "sensitive": {
+          "$ref": "#/definitions/sensitive"
+        },
+        "subfields": {
+          "$ref": "#/definitions/subfields"
+        }
+      },
+      "if": {
+        "required": [
+          "remove"
+        ]
+      },
+      "then": {
+        "maxProperties": 1
+      },
+      "else": {
+        "minProperties": 1,
+        "allOf": [
+          {
+            "$ref": "#/definitions/variableLengthLimits"
+          }
+        ]
+      }
+    },
+    "variableLengthLimits": {
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "lengthType",
+              "maxLength"
+            ],
+            "properties": {
+              "lengthType": {
+                "const": "LLVAR"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "maxLength": {
+                "maximum": 99
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "lengthType",
+              "maxLength"
+            ],
+            "properties": {
+              "lengthType": {
+                "const": "LLLVAR"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "maxLength": {
+                "maximum": 999
+              }
+            }
+          }
+        }
+      ]
+    },
+    "padding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "side",
+        "char"
+      ],
+      "properties": {
+        "side": {
+          "enum": [
+            "LEFT",
+            "RIGHT"
+          ]
+        },
+        "char": {
+          "description": "Pad character, or a single hex nibble for BCD data (e.g. \"F\").",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1
+        }
+      }
+    },
+    "subfields": {
+      "type": "object",
+      "required": [
+        "layout"
+      ],
+      "properties": {
+        "layout": {
+          "enum": [
+            "FIXED",
+            "BER_TLV",
+            "PRIVATE_TLV",
+            "BITMAP"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "layout": {
+                "const": "FIXED"
+              }
+            }
+          },
+          "then": {
+            "additionalProperties": false,
+            "required": [
+              "fields"
+            ],
+            "properties": {
+              "layout": true,
+              "fields": {
+                "description": "Consecutive fixed-position slices, in order.",
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "$ref": "#/definitions/fixedSubfield"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "layout": {
+                "const": "BER_TLV"
+              }
+            }
+          },
+          "then": {
+            "description": "EMV BER-TLV data, such as field 55.",
+            "additionalProperties": false,
+            "properties": {
+              "layout": true
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "layout": {
+                "const": "PRIVATE_TLV"
+              }
+            }
+          },
+          "then": {
+            "description": "Tag-length-value with fixed-size tags and lengths, as in fields 48, 62, 63, 126 or 127.",
+            "additionalProperties": false,
+            "required": [
+              "tagLength",
+              "lengthLength"
+            ],
+            "properties": {
+              "layout": true,
+              "tagLength": {
+                "description": "Tag size in characters (or bytes for BINARY).",
+                "type": "integer",
+                "minimum": 1
+              },
+              "tagEncoding": {
+                "description": "Not yet supported by the decoder unless it matches the field's own character encoding.",
+                "$ref": "#/definitions/encoding"
+              },
+              "lengthLength": {
+                "description": "Length size in characters (or bytes for BINARY/BCD).",
+                "type": "integer",
+                "minimum": 1
+              },
+              "lengthEncoding": {
+                "description": "Not yet supported by the decoder unless it matches the field's own character encoding.",
+                "$ref": "#/definitions/encoding"
+              },
+              "tags": {
+                "description": "Optional names for known tags.",
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "layout": {
+                "const": "BITMAP"
+              }
+            }
+          },
+          "then": {
+            "description": "A bitmap followed by the subfields it announces, numbered from 1. No continuation bit.",
+            "additionalProperties": false,
+            "required": [
+              "bitmapLength",
+              "fields"
+            ],
+            "properties": {
+              "layout": true,
+              "bitmapLength": {
+                "description": "Bitmap size in bytes (binary form; hex encodings take 2 characters per byte).",
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 16
+              },
+              "bitmapEncoding": {
+                "enum": [
+                  "BINARY",
+                  "HEX_ASCII",
+                  "HEX_EBCDIC"
+                ],
+                "default": "BINARY"
+              },
+              "fields": {
+                "type": "object",
+                "propertyNames": {
+                  "pattern": "^[1-9][0-9]*$"
+                },
+                "additionalProperties": {
+                  "$ref": "#/definitions/field"
+                },
+                "description": "Subfields keyed \"1\" up to 8 x bitmapLength, each a complete field definition."
+              }
+            }
+          }
+        }
+      ]
+    },
+    "fixedSubfield": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "length"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "length": {
+          "description": "Slice size in characters (or bytes for BINARY data).",
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "description": "Informational for now. Subfields are numbered by their 1-based position.",
+          "$ref": "#/definitions/fieldType"
+        },
+        "sensitive": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

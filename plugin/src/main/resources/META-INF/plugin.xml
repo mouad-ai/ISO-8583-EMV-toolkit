@@ -12,6 +12,8 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- Autocomplete and validation for dialect files; everything else works without the JSON plugin. -->
+    <depends optional="true" config-file="octet-json.xml">com.intellij.modules.json</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Octet"
@@ -39,4 +41,8 @@
             <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
         </group>
     </actions>
+    <projectListeners>
+        <listener class="io.github.mouadai.octet.plugin.dialect.DialectVfsListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+    </projectListeners>
 </idea-plugin>
