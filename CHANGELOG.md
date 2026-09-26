@@ -8,6 +8,8 @@
 - Sample dialects in `samples/dialects`: an ASCII acquirer override and a binary host with TPDU framing.
 - Dialects that `extends` another may omit `fields` (framing-only overrides validate).
 - README rewritten; Marketplace listing draft in `docs/marketplace-listing.md`.
+- Vendor set to Mouad EL MRABATE; plugin version 1.0.0 so it matches the product descriptor's release-version.
+- Screenshot kit: sample files in `docs/screenshot-samples` (open as a project in `runIde`) and a step-by-step `docs/screenshot-guide.md`.
 - Paid features check the license: the Build and Diff tabs show an "Enter license" note when unlicensed, project and user dialects are not offered, jPOS import opens the register dialog, and console hex detection stays off.
 - "Diff" tab in the tool window, using the same dialects as the decoder and reloading with them.
 - Dialect files show a banner with their load error, or a note when dialects need Octet Pro; banners refresh when any dialect file changes.

@@ -38,15 +38,19 @@ Payments, ISO 8583, EMV, Fintech, Parser
 
 ## Screenshots to take (in a real IDE)
 
+Step by step, with sample files: [screenshot-guide.md](screenshot-guide.md).
+
 1. Decode tab: an ISO 8583 message with the tree and hex view side by side, a field selected.
 2. Field 55 expanded, with the TVR bits shown.
 3. A dialect file with autocomplete open on `lengthType`.
-4. The diff tab comparing a request and a response.
-5. The builder with the export menu.
+4. The diff tab comparing an expected and an actual request.
+5. The builder with the code export output.
+6. (Optional) The error banner on a broken dialect file.
+7. (Optional) "Decode as ISO 8583" on a selection in a log file.
 
 ## Before publishing
 
-- Register as a Marketplace vendor, create the paid plugin, and put the product code JetBrains
+- Create the paid plugin under the vendor account (Mouad EL MRABATE), and put the product code JetBrains
   assigns into `plugin.xml` (`product-descriptor`) and `OctetLicense.PRODUCT_CODE`, replacing
   the `POCTET` placeholder.
 - Set `release-date` and `release-version` in the `product-descriptor` for each release.

@@ -1,0 +1,8 @@
+{
+  "id": "broken-host",
+  "name": "Broken host (sample)",
+  "extends": "iso8583-1987-ascci",
+  "fields": {
+    "2": { "maxLength": 19 }
+  }
+}

@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>io.github.mouadai.octet</id>
     <name>Octet</name>
-    <vendor url="https://github.com/mouad-ai/ISO-8583-EMV-toolkit">mouad-ai</vendor>
+    <vendor url="https://github.com/mouad-ai/ISO-8583-EMV-toolkit">Mouad EL MRABATE</vendor>
     <!-- Freemium: optional="true" keeps the plugin usable without a license; see OctetLicense.
          The code is a placeholder until JetBrains Marketplace assigns one. release-version must
          match the start of the plugin version (1.0.x -> 10), or the Plugin Verifier rejects it. -->

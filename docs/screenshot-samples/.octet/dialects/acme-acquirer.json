@@ -1,0 +1,14 @@
+{
+  "id": "acme-acquirer",
+  "name": "ACME Acquirer (sample)",
+  "extends": "iso8583-1987-ascii",
+  "fields": {
+    "2": { "maxLength": 16 },
+    "48": { "remove": true },
+    "63": {
+      "name": "ACME private data",
+      "lengthType": "LLLVAR",
+      "maxLength": 255
+    }
+  }
+}
