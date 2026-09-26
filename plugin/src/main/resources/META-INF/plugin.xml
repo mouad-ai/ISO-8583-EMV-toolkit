@@ -1,11 +1,11 @@
 <idea-plugin>
-    <id>io.github.mouadai.octet</id>
-    <name>Octet</name>
+    <id>io.github.mouadai.cardwire</id>
+    <name>Cardwire</name>
     <vendor url="https://github.com/mouad-ai/ISO-8583-EMV-toolkit">Mouad EL MRABATE</vendor>
-    <!-- Freemium: optional="true" keeps the plugin usable without a license; see OctetLicense.
-         The code is a placeholder until JetBrains Marketplace assigns one. release-version must
+    <!-- Freemium: optional="true" keeps the plugin usable without a license; see CardwireLicense.
+         PCARDWIRE is the requested code; confirm it when JetBrains approves the paid plugin. release-version must
          match the start of the plugin version (1.0.x -> 10), or the Plugin Verifier rejects it. -->
-    <product-descriptor code="POCTET" release-date="20260926" release-version="10" optional="true"/>
+    <product-descriptor code="PCARDWIRE" release-date="20260926" release-version="10" optional="true"/>
 
     <description><![CDATA[
     Decode, build and diff ISO 8583 messages and EMV BER-TLV data (field 55 and more) without leaving your IDE.
@@ -17,35 +17,35 @@
 
     <depends>com.intellij.modules.platform</depends>
     <!-- Autocomplete and validation for dialect files; everything else works without the JSON plugin. -->
-    <depends optional="true" config-file="octet-json.xml">com.intellij.modules.json</depends>
+    <depends optional="true" config-file="cardwire-json.xml">com.intellij.modules.json</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="Octet"
+        <toolWindow id="Cardwire"
                     anchor="right"
-                    icon="/icons/octetToolWindow.svg"
-                    factoryClass="io.github.mouadai.octet.plugin.OctetToolWindowFactory"/>
-        <consoleFilterProvider implementation="io.github.mouadai.octet.plugin.OctetConsoleFilterProvider"/>
+                    icon="/icons/cardwireToolWindow.svg"
+                    factoryClass="io.github.mouadai.cardwire.plugin.CardwireToolWindowFactory"/>
+        <consoleFilterProvider implementation="io.github.mouadai.cardwire.plugin.CardwireConsoleFilterProvider"/>
         <applicationConfigurable parentId="tools"
-                                 id="io.github.mouadai.octet.settings"
-                                 displayName="Octet"
-                                 instance="io.github.mouadai.octet.plugin.OctetConfigurable"/>
-        <editorNotificationProvider implementation="io.github.mouadai.octet.plugin.dialect.DialectFileNotificationProvider"/>
+                                 id="io.github.mouadai.cardwire.settings"
+                                 displayName="Cardwire"
+                                 instance="io.github.mouadai.cardwire.plugin.CardwireConfigurable"/>
+        <editorNotificationProvider implementation="io.github.mouadai.cardwire.plugin.dialect.DialectFileNotificationProvider"/>
     </extensions>
 
     <actions>
-        <action id="Octet.ImportJposPackager"
-                class="io.github.mouadai.octet.plugin.jpos.ImportJposPackagerAction"
-                text="Import jPOS Packager as Octet Dialect..."
-                description="Convert a jPOS GenericPackager XML file into an Octet dialect in .octet/dialects">
+        <action id="Cardwire.ImportJposPackager"
+                class="io.github.mouadai.cardwire.plugin.jpos.ImportJposPackagerAction"
+                text="Import jPOS Packager as Cardwire Dialect..."
+                description="Convert a jPOS GenericPackager XML file into an Cardwire dialect in .cardwire/dialects">
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
-        <group id="Octet.DecodeSelection" text="Octet" popup="true">
-            <action id="Octet.DecodeSelectionAsIso"
-                    class="io.github.mouadai.octet.plugin.DecodeSelectionAsIsoAction"
+        <group id="Cardwire.DecodeSelection" text="Cardwire" popup="true">
+            <action id="Cardwire.DecodeSelectionAsIso"
+                    class="io.github.mouadai.cardwire.plugin.DecodeSelectionAsIsoAction"
                     text="Decode as ISO 8583"
                     description="Decode the selected hex, base64 or text as an ISO 8583 message"/>
-            <action id="Octet.DecodeSelectionAsEmv"
-                    class="io.github.mouadai.octet.plugin.DecodeSelectionAsEmvAction"
+            <action id="Cardwire.DecodeSelectionAsEmv"
+                    class="io.github.mouadai.cardwire.plugin.DecodeSelectionAsEmvAction"
                     text="Decode as EMV TLV"
                     description="Decode the selected hex or base64 as EMV BER-TLV data"/>
             <add-to-group group-id="EditorPopupMenu" anchor="last"/>
@@ -54,9 +54,9 @@
     </actions>
 
     <projectListeners>
-        <listener class="io.github.mouadai.octet.plugin.dialect.DialectVfsListener"
+        <listener class="io.github.mouadai.cardwire.plugin.dialect.DialectVfsListener"
                   topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
-        <listener class="io.github.mouadai.octet.plugin.dialect.DialectBannerRefresher"
-                  topic="io.github.mouadai.octet.plugin.dialect.DialectsChangedListener"/>
+        <listener class="io.github.mouadai.cardwire.plugin.dialect.DialectBannerRefresher"
+                  topic="io.github.mouadai.cardwire.plugin.dialect.DialectsChangedListener"/>
     </projectListeners>
 </idea-plugin>

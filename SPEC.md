@@ -1,6 +1,6 @@
 # SPEC — ISO 8583 / EMV Toolkit for JetBrains IDEs
 
-> Working name: **Octet** (placeholder — check JetBrains Marketplace and trademarks before publishing).
+> Product name: **Cardwire** (chosen 2026-09-26 after a web conflict check; not a legal trademark clearance).
 > Do NOT put "EMV" or "ISO" in the product name itself (EMV is an EMVCo trademark); using them descriptively in the plugin description is fine.
 
 This file is the source of truth for Claude Code. Read it fully before writing code. Work milestone by milestone (section 9), and do not start a milestone until the previous one's acceptance criteria pass.
@@ -52,7 +52,7 @@ Key selling points, in order:
 Gradle multi-module project:
 
 ```
-octet/
+cardwire/
 ├─ core/          Pure Kotlin/JVM library. NO IntelliJ dependencies.
 │                 Parsing, encoding, dialect model, TLV, masking, diff.
 ├─ plugin/        IntelliJ Platform plugin. UI, actions, settings, licensing.
@@ -131,7 +131,7 @@ Fields/tags flagged `sensitive` (default: fields 2, 14, 35, 36, 45, 52, 55-tag 5
 ## 7. Dialects
 
 - Format: JSON or YAML, one file per dialect, with a published **JSON Schema** registered via `JsonSchemaProviderFactory` so users get autocomplete and validation when editing dialect files.
-- Locations: bundled (read-only), project-level (`.octet/dialects/*.json`, shareable via git), and user-level (IDE config dir).
+- Locations: bundled (read-only), project-level (`.cardwire/dialects/*.json`, shareable via git), and user-level (IDE config dir).
 - Built-in generic dialects:
   - ISO 8583:1987 ASCII (ASCII MTI, hex-ASCII bitmap, ASCII lengths)
   - ISO 8583:1987 binary (BCD numerics, binary bitmap, BCD lengths)

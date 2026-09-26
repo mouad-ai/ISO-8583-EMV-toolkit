@@ -1,7 +1,7 @@
 {
   "id": "example-acquirer",
   "name": "Example acquirer (1987 ASCII variant)",
-  "description": "Sample processor dialect: the generic 1987 ASCII layout with a shorter PAN, no field 48 and a private TLV field 63. Fictional; copy it into .octet/dialects and adapt it.",
+  "description": "Sample processor dialect: the generic 1987 ASCII layout with a shorter PAN, no field 48 and a private TLV field 63. Fictional; copy it into .cardwire/dialects and adapt it.",
   "extends": "iso8583-1987-ascii",
   "fields": {
     "2": { "maxLength": 16 },
