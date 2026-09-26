@@ -214,5 +214,7 @@ Choices made where SPEC.md leaves room, newest last.
 - **Unknown license state counts as enabled**: while the facade is not yet initialised, features
   are not locked, to avoid flicker and false lock-outs at startup.
 - **Dev property** `octet.license.dev=true` unlocks everything; set for `runIde` and tests only.
+- **First release is 1.0.0**: a paid plugin's `release-version` must match the start of the plugin
+  version (`10` for 1.0.x), which no 0.x version can, so the version moved from 0.1.0 to 1.0.0.
 - **Product code `POCTET` is a placeholder** until mouad creates the Marketplace vendor account.
 - **`fields` is optional when a dialect `extends` another**, so a framing-only override is valid.
