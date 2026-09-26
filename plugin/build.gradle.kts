@@ -39,6 +39,9 @@ dependencies {
 intellijPlatform {
     // No settings pages yet; skip the slow headless IDE run that indexes them.
     buildSearchableOptions = false
+    // Kotlin only, no GUI Designer forms: nothing to instrument. The task also fails on some local
+    // JDKs, e.g. a Microsoft JDK in ~/.jdks on Windows ("...\Packages does not exist").
+    instrumentCode = false
 
     pluginConfiguration {
         version = project.version.toString()
