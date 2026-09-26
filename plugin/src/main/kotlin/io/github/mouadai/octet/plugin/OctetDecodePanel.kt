@@ -19,8 +19,10 @@ import io.github.mouadai.octet.core.input.HexDump
 import io.github.mouadai.octet.core.input.InputDecoder
 import io.github.mouadai.octet.core.input.InputFormat
 import io.github.mouadai.octet.core.input.InputResult
-import io.github.mouadai.octet.core.iso.BuiltinDialects
 import io.github.mouadai.octet.core.iso.Dialect
+import io.github.mouadai.octet.core.iso.DialectCatalog
+import io.github.mouadai.octet.core.iso.DialectEntry
+import io.github.mouadai.octet.core.iso.DialectSource
 import io.github.mouadai.octet.core.view.DecodeMode
 import io.github.mouadai.octet.core.view.DecodeNode
 import io.github.mouadai.octet.core.view.DecodeView
@@ -35,9 +37,10 @@ import javax.swing.tree.TreePath
 /**
  * Decode tool window: pasted input, decoded tree and hex view. Selecting a tree node highlights its
  * bytes; clicking a byte in the hex view selects the deepest node that covers it. All decoding lives
- * in `core`; this class only wires results into Swing.
+ * in `core`; this class only wires results into Swing. [dialectSources] supplies project and user
+ * dialect files (M5) for the dialect picker, next to the built-ins.
  */
-class OctetDecodePanel {
+class OctetDecodePanel(private val dialectSources: () -> List<DialectSource> = { emptyList() }) {
 
     private val formats = listOf(
         "Auto" to InputFormat.AUTO,
@@ -53,9 +56,8 @@ class OctetDecodePanel {
     }
     private val formatCombo = ComboBox(formats.map { it.first }.toTypedArray())
     internal val modeCombo = ComboBox(DecodeMode.entries.map { it.label }.toTypedArray())
-    // Built-in dialects for now; project and user dialect folders (M5) plug in here.
-    private val dialects: List<Dialect> = BuiltinDialects.all
-    internal val dialectCombo = ComboBox(dialects.map { it.name }.toTypedArray())
+    private var dialects: List<DialectEntry> = emptyList()
+    internal val dialectCombo = ComboBox<String>()
     internal val framingCombo = ComboBox<String>()
     internal val revealCheckBox = JBCheckBox("Reveal sensitive values")
     internal val status = JBLabel()
@@ -114,7 +116,7 @@ class OctetDecodePanel {
         revealCheckBox.addActionListener { lastInput?.let(::render) }
         modeCombo.addActionListener { updateIsoControls() }
         dialectCombo.addActionListener { updateFramings() }
-        updateFramings()
+        reloadDialects()
         updateIsoControls()
         hexView.addCaretListener { event ->
             if (!updatingHexView) selectNodeAtByte(dump?.byteOffsetAt(event.dot))
@@ -173,7 +175,23 @@ class OctetDecodePanel {
 
     private fun selectedMode(): DecodeMode = DecodeMode.entries[modeCombo.selectedIndex.coerceAtLeast(0)]
 
-    private fun selectedDialect(): Dialect = dialects[dialectCombo.selectedIndex.coerceAtLeast(0)]
+    private fun selectedDialect(): Dialect = dialects[dialectCombo.selectedIndex.coerceAtLeast(0)].dialect
+
+    /** Rebuilds the dialect picker from built-ins and [dialectSources], keeping the selection when it still exists. */
+    fun reloadDialects() {
+        val previous = dialects.getOrNull(dialectCombo.selectedIndex)?.label
+        val catalog = DialectCatalog.build(dialectSources())
+        dialects = catalog.entries
+        dialectCombo.removeAllItems()
+        dialects.forEach { dialectCombo.addItem(it.label) }
+        dialectCombo.selectedIndex = dialects.indexOfFirst { it.label == previous }.coerceAtLeast(0)
+        updateFramings()
+        when (catalog.problems.size) {
+            0 -> Unit
+            1 -> showStatus("Skipped dialect ${catalog.problems.single()}", isError = true)
+            else -> showStatus("Skipped dialect ${catalog.problems.first()} (+${catalog.problems.size - 1} more)", isError = true)
+        }
+    }
 
     /** Framing choices: "Auto" (index 0) then the selected dialect's own framings. */
     private fun updateFramings() {

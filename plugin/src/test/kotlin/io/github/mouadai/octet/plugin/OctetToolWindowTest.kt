@@ -105,6 +105,22 @@ class OctetToolWindowTest : BasePlatformTestCase() {
         assertEquals("Auto", panel.framingCombo.getItemAt(0))
     }
 
+    fun testProjectDialectsJoinThePickerAndReloadKeepsTheSelection() {
+        myFixture.addFileToProject(
+            ".octet/dialects/acme.json",
+            """{"id": "test-acme", "name": "Test Acme", "extends": "iso8583-1987-ascii", "fields": {}}""",
+        )
+        myFixture.addFileToProject(".octet/dialects/broken.json", "{ not json")
+        val panel = OctetDecodePanel { OctetToolWindowFactory.dialectSources(project) }
+        val labels = (0 until panel.dialectCombo.itemCount).map { panel.dialectCombo.getItemAt(it) }
+        assertTrue(labels.toString(), "Test Acme (project)" in labels)
+        assertTrue(panel.status.text, panel.status.text.contains("broken.json"))
+
+        panel.dialectCombo.selectedItem = "Test Acme (project)"
+        panel.reloadDialects()
+        assertEquals("Test Acme (project)", panel.dialectCombo.selectedItem)
+    }
+
     private fun selectedNode(panel: OctetDecodePanel): DecodeNode =
         (panel.tree.selectionPath!!.lastPathComponent as DefaultMutableTreeNode).userObject as DecodeNode
 

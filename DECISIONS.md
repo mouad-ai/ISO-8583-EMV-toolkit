@@ -139,3 +139,8 @@ Choices made where SPEC.md leaves room, newest last.
   recursive) and user `<config dir>/octet/dialects/*.json`. A project-level VFS listener publishes
   `DialectsChangedListener.TOPIC` once per batch of changes touching those folders.
 - **YAML dialect files** are not mapped yet; JSON only until the loader supports YAML.
+
+## Dialect picker (M3 + M5)
+- `core/iso/DialectCatalog` merges built-ins with dialect file texts, so load order, labels and `extends` between user files are unit-tested without the IDE. The plugin only reads files from `DialectFileService`.
+- A dialect file can extend another dialect file by `id`, not only a built-in. Duplicate ids: the first file wins as a base.
+- Broken files are skipped with a status-line message instead of a popup, so a half-typed file being edited doesn't nag.
