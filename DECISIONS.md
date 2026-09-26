@@ -125,3 +125,22 @@ Choices made where SPEC.md leaves room, newest last.
 - **`BITMAP` subfields**: one fixed bitmap of `bitmapLength` bytes (binary, hex-ASCII or
   hex-EBCDIC), all bits numbering subfields (no continuation bit); each subfield is a full field
   definition with its own length prefix. Subfield errors are reported and keep the parent field.
+
+## M7 — Builder
+
+- **Builder logic lives in `core/builder`.** `MessageBuilder` checks and encodes (via `IsoEncoder`),
+  `TlvBuilder`/`EmvValueEncoder` build field 55, `Exporters` renders outputs. The Swing tab only
+  moves values between the table and these classes.
+- **Friendly EMV input.** The field 55 editor takes each tag's natural form (amount `10.00`, date
+  `2026-09-25`, currency `MAD`, country `MA`, text) based on the M1 dictionary's display kind.
+  `hex:` forces raw hex for any tag. Existing values are shown in the friendly form only when it
+  encodes back to the exact same bytes; otherwise they appear as `hex:`.
+- **Amounts use the currency row.** An amount's decimal places come from the 5F2A row's currency
+  (ISO 4217 minor unit), else 2.
+- **Exports are not masked.** SPEC 6.8 masks copies of decoded data, but the builder's output is a
+  message the user typed in and needs verbatim, so building and copying it counts as the explicit
+  override.
+- **Header bytes.** Framings with a header (TPDU or custom) get a zero-filled header in the builder;
+  editing header bytes can come later.
+- **jPOS snippet** uses `ISOMsg.set(int, String)` for text fields and `ISOUtil.hex2byte` for type `b`
+  fields. It names the dialect but does not generate a packager.

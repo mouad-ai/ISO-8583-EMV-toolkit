@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### M7 — Builder
+- "Build" tab in the tool window: pick a dialect, MTI and framing, fill fields in a table, build, and copy the output.
+- Field values are checked per field with messages that name the field; a, an and ans character classes are enforced.
+- Field 55 editor: one row per EMV tag, values typed as amounts, dates, currencies, countries or text (or `hex:`), built into BER-TLV.
+- Exports: hex, base64, Java `byte[]` literal, Kotlin `byteArrayOf` literal and a jPOS `ISOMsg` snippet.
+
 ### M1 — TLV core
 - BER-TLV decoder and encoder with byte offsets, multi-byte tags, long-form lengths and byte-exact round trip.
 - Best-effort parsing: malformed or truncated input returns the decoded part plus errors with offsets; unknown tags decode structurally.
