@@ -5,7 +5,7 @@
 ### M8 — Diff
 - `MessageDiff` in `core`: structural diff of two decoded messages (ISO 8583 fields or EMV tags), matched by id, with repeated tags matched by occurrence and reordering tolerated.
 - `DiffReport`: plain-text list of added, removed and changed elements with their paths.
-- `OctetDiffPanel`: paste two messages, see one merged tree with changes highlighted, copy the report. It joins the tool window as a Diff tab once the decode window (M3) lands.
+- `OctetDiffPanel`: paste two messages, see one merged tree with changes highlighted, copy the report. Decodes both sides the same way (ISO 8583 with a dialect, or EMV TLV), masked.
 
 ### M7 — Builder
 - "Build" tab in the tool window: pick a dialect, MTI and framing, fill fields in a table, build, and copy the output.

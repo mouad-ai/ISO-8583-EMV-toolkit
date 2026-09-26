@@ -1,6 +1,7 @@
 package io.github.mouadai.octet.plugin
 
 import com.intellij.openapi.ide.CopyPasteManager
+import com.intellij.openapi.ui.ComboBox
 import com.intellij.openapi.ui.DialogPanel
 import com.intellij.ui.ColoredTreeCellRenderer
 import com.intellij.ui.JBColor
@@ -20,7 +21,10 @@ import io.github.mouadai.octet.core.diff.DiffReport
 import io.github.mouadai.octet.core.diff.MessageDiff
 import io.github.mouadai.octet.core.input.InputDecoder
 import io.github.mouadai.octet.core.input.InputResult
-import io.github.mouadai.octet.core.view.DecodeNode
+import io.github.mouadai.octet.core.iso.BuiltinDialects
+import io.github.mouadai.octet.core.iso.Dialect
+import io.github.mouadai.octet.core.view.DecodeMode
+import io.github.mouadai.octet.core.view.DecodeView
 import java.awt.Font
 import java.awt.datatransfer.StringSelection
 import javax.swing.JTree
@@ -28,10 +32,18 @@ import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.DefaultTreeModel
 
 /**
- * Diff tool window tab (SPEC 8.4): two pasted messages, decoded with [decode] and compared in
- * `core`. Shows one merged tree with added, removed and changed elements highlighted.
+ * Diff tool window tab (SPEC 8.4): two pasted messages, decoded the same way (ISO 8583 with a
+ * dialect, or EMV TLV) and compared in `core`. Shows one merged tree with added, removed and
+ * changed elements highlighted. Both sides are decoded masked.
+ *
+ * @param dialectProvider dialects to offer; called again by [reloadDialects] when dialect files change
  */
-class OctetDiffPanel(private val decode: (ByteArray) -> DecodeNode) {
+class OctetDiffPanel(private val dialectProvider: () -> List<Dialect> = { BuiltinDialects.all }) {
+
+    private val modes = listOf(DecodeMode.ISO_8583, DecodeMode.EMV_TLV)
+    private var dialects: List<Dialect> = dialectProvider()
+    internal val modeCombo = ComboBox(modes.map { it.label }.toTypedArray())
+    internal val dialectCombo = ComboBox(dialects.map { it.name }.toTypedArray())
 
     internal val leftInput = inputArea("Expected, or the request")
     internal val rightInput = inputArea("Actual, or the response")
@@ -46,6 +58,11 @@ class OctetDiffPanel(private val decode: (ByteArray) -> DecodeNode) {
         private set
 
     val component: DialogPanel = panel {
+        row("Decode as:") {
+            cell(modeCombo)
+            label("Dialect:")
+            cell(dialectCombo)
+        }
         row {
             val inputs = JBSplitter(false, 0.5f).apply {
                 firstComponent = JBScrollPane(leftInput)
@@ -62,6 +79,32 @@ class OctetDiffPanel(private val decode: (ByteArray) -> DecodeNode) {
             cell(JBScrollPane(tree)).align(Align.FILL)
         }.resizableRow()
     }
+
+    init {
+        modeCombo.addActionListener { dialectCombo.isEnabled = selectedMode() == DecodeMode.ISO_8583 }
+    }
+
+    internal fun selectMode(mode: DecodeMode) {
+        modeCombo.selectedIndex = modes.indexOf(mode)
+    }
+
+    /** Re-reads the dialect list, keeping the selected dialect when it still exists. */
+    fun reloadDialects() {
+        val selectedId = dialects.getOrNull(dialectCombo.selectedIndex)?.id
+        dialects = dialectProvider()
+        dialectCombo.removeAllItems()
+        dialects.forEach { dialectCombo.addItem(it.name) }
+        dialectCombo.selectedIndex = dialects.indexOfFirst { it.id == selectedId }.coerceAtLeast(0)
+    }
+
+    private fun selectedMode(): DecodeMode = modes[modeCombo.selectedIndex.coerceAtLeast(0)]
+
+    private fun decode(bytes: ByteArray) = DecodeView.decode(
+        bytes,
+        selectedMode(),
+        reveal = false,
+        dialect = dialects[dialectCombo.selectedIndex.coerceAtLeast(0)],
+    ).root
 
     internal fun compare() {
         val left = readSide("Left", leftInput.text) ?: return
