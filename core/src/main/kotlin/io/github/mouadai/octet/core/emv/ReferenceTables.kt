@@ -7,9 +7,15 @@ data class Country(val numeric: String, val alpha2: String, val alpha3: String, 
 class ReferenceTables(currencies: Collection<Currency>, countries: Collection<Country>) {
     private val currencyByCode = currencies.associateBy { it.numeric }
     private val countryByCode = countries.associateBy { it.numeric }
+    private val currencyByAlpha = currencies.associateBy { it.alpha }
+    private val countryByAlpha = countries.associateBy { it.alpha2 } + countries.associateBy { it.alpha3 }
 
     fun currency(numeric: String): Currency? = currencyByCode[numeric.padStart(3, '0').takeLast(3)]
     fun country(numeric: String): Country? = countryByCode[numeric.padStart(3, '0').takeLast(3)]
+
+    /** Looks up by alphabetic code: ISO 4217 "MAD", or ISO 3166 "MA" / "MAR". Case-insensitive. */
+    fun currencyByAlpha(alpha: String): Currency? = currencyByAlpha[alpha.uppercase()]
+    fun countryByAlpha(alpha: String): Country? = countryByAlpha[alpha.uppercase()]
 
     companion object {
         val default: ReferenceTables by lazy {
