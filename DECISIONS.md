@@ -109,3 +109,13 @@ Choices made where SPEC.md leaves room, newest last.
   lengths in an encoding different from the field's own character encoding.
 - **One JSON reader.** The dialect loader reuses the M1 reader (`emv/JsonResources`) rather than
   adding a second one.
+
+## M4
+
+- **Console hex detection threshold: 16 bytes**, written as contiguous hex digits or byte pairs
+  separated by single spaces, not starting or ending inside a longer hex word. Shorter runs are
+  mostly ids and hashes' prefixes; odd-length runs are skipped. The whole run becomes the link.
+- **Console links keep the tool window's current mode and dialect**, since a log line does not say
+  what it contains; the editor actions pick ISO 8583 or EMV TLV explicitly.
+- **Settings are application-level** (`octet.xml` in the IDE config dir) and the console filter is
+  checked per line, so toggling it applies to new output without restarting the run.

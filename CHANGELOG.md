@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### M4 — Editor and console actions
+- "Octet > Decode as ISO 8583" and "Decode as EMV TLV" in the editor and Run/Debug console context menus decode the selection in the tool window.
+- Optional console filter (Settings > Tools > Octet, off by default) turns hex dumps of 16+ bytes, contiguous or space-separated, into links that open them in the decoder.
+
 ### M1 — TLV core
 - BER-TLV decoder and encoder with byte offsets, multi-byte tags, long-form lengths and byte-exact round trip.
 - Best-effort parsing: malformed or truncated input returns the decoded part plus errors with offsets; unknown tags decode structurally.

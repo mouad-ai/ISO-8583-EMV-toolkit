@@ -155,6 +155,14 @@ class OctetDecodePanel {
         }
     }
 
+    /** Decodes [text] as if pasted, with auto-detected input format. [mode] null keeps the current mode. */
+    fun decodeText(text: String, mode: DecodeMode?) {
+        selectFormat(InputFormat.AUTO)
+        mode?.let(::selectMode)
+        input.text = text
+        decode()
+    }
+
     internal fun selectFormat(format: InputFormat) {
         formatCombo.selectedIndex = formats.indexOfFirst { it.second == format }
     }

@@ -18,5 +18,25 @@
                     anchor="right"
                     icon="/icons/octetToolWindow.svg"
                     factoryClass="io.github.mouadai.octet.plugin.OctetToolWindowFactory"/>
+        <consoleFilterProvider implementation="io.github.mouadai.octet.plugin.OctetConsoleFilterProvider"/>
+        <applicationConfigurable parentId="tools"
+                                 id="io.github.mouadai.octet.settings"
+                                 displayName="Octet"
+                                 instance="io.github.mouadai.octet.plugin.OctetConfigurable"/>
     </extensions>
+
+    <actions>
+        <group id="Octet.DecodeSelection" text="Octet" popup="true">
+            <action id="Octet.DecodeSelectionAsIso"
+                    class="io.github.mouadai.octet.plugin.DecodeSelectionAsIsoAction"
+                    text="Decode as ISO 8583"
+                    description="Decode the selected hex, base64 or text as an ISO 8583 message"/>
+            <action id="Octet.DecodeSelectionAsEmv"
+                    class="io.github.mouadai.octet.plugin.DecodeSelectionAsEmvAction"
+                    text="Decode as EMV TLV"
+                    description="Decode the selected hex or base64 as EMV BER-TLV data"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
+        </group>
+    </actions>
 </idea-plugin>
