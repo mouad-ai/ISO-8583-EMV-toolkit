@@ -20,6 +20,7 @@
 - Autocomplete and validation for `.octet/dialects/*.json` and user dialect files (needs the bundled JSON plugin).
 - Project and user dialect folders are listed and watched; changes publish a `DialectsChangedListener` event.
 - `docs/dialects.md` describes the format.
+- The decode window's dialect picker lists project and user dialects after the built-ins, labelled by scope, and reloads when a dialect file changes. A dialect file may extend a built-in or another dialect file; files that fail to load are skipped and named in the status line.
 
 ### M1 — TLV core
 - BER-TLV decoder and encoder with byte offsets, multi-byte tags, long-form lengths and byte-exact round trip.
