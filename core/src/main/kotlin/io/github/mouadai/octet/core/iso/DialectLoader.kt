@@ -184,7 +184,7 @@ object DialectLoader {
             }
         }
 
-        fun field(id: Int, item: Any?, path: String): FieldSpec? {
+        fun field(id: Int, item: Any?, path: String, fieldPath: String? = null): FieldSpec? {
             val o = obj(item, path) ?: return null
             val errorCount = errors.size
             val name = string(o, "name", path)
@@ -206,13 +206,13 @@ object DialectLoader {
             val dataEncoding = enum<DataEncoding>(string(o, "dataEncoding", path, default = "ASCII"), path.dot("dataEncoding"))
             val padding = o["padding"]?.let { padding(it, path.dot("padding")) }
             val sensitive = bool(o, "sensitive", path)
-            val subfields = o["subfields"]?.let { subfields(it, path.dot("subfields"), dataEncoding) }
+            val subfields = o["subfields"]?.let { subfields(it, path.dot("subfields"), dataEncoding, fieldPath ?: id.toString()) }
             if (errors.size > errorCount || name == null || type == null || lengthType == null || maxLength == null ||
                 lengthEncoding == null || dataEncoding == null
             ) {
                 return null
             }
-            return FieldSpec(id, name, type, lengthType, maxLength, lengthEncoding, dataEncoding, padding, sensitive, subfields)
+            return FieldSpec(id, name, type, lengthType, maxLength, lengthEncoding, dataEncoding, padding, sensitive, subfields, fieldPath)
         }
 
         fun padding(item: Any?, path: String): Padding? {
@@ -223,7 +223,7 @@ object DialectLoader {
             return Padding(side, char[0])
         }
 
-        fun subfields(item: Any?, path: String, dataEncoding: DataEncoding?): SubfieldLayout? {
+        fun subfields(item: Any?, path: String, dataEncoding: DataEncoding?, parentPath: String): SubfieldLayout? {
             val o = obj(item, path) ?: return null
             return when (val layout = string(o, "layout", path)) {
                 null -> null
@@ -255,7 +255,22 @@ object DialectLoader {
                     SubfieldLayout.PrivateTlv(tag, len, tags)
                 }
                 "BER_TLV" -> SubfieldLayout.BerTlv
-                "BITMAP" -> error(path.dot("layout"), "BITMAP subfields are not supported yet")
+                "BITMAP" -> {
+                    val length = int(o, "bitmapLength", path) ?: return null
+                    if (length !in 1..16) return error(path.dot("bitmapLength"), "must be between 1 and 16")
+                    val encoding = enum<BitmapEncoding>(string(o, "bitmapEncoding", path, default = "BINARY"), path.dot("bitmapEncoding")) ?: return null
+                    val fieldMap = obj(o["fields"] ?: return error(path.dot("fields"), "is required"), path.dot("fields")) ?: return null
+                    val subs = sortedMapOf<Int, FieldSpec>()
+                    for ((key, sub) in fieldMap) {
+                        val number = key.toIntOrNull()?.takeIf { it in 1..length * 8 && it.toString() == key }
+                        if (number == null) {
+                            error("$path.fields.$key", "subfield numbers must be 1 to ${length * 8}")
+                            continue
+                        }
+                        field(number, sub, "$path.fields.$key", "$parentPath.$number")?.let { subs[number] = it }
+                    }
+                    SubfieldLayout.Bitmapped(length, encoding, subs)
+                }
                 else -> error(path.dot("layout"), "unknown layout '$layout' (expected FIXED, BER_TLV, PRIVATE_TLV or BITMAP)")
             }
         }

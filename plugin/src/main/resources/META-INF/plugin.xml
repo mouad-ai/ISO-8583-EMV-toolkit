@@ -28,6 +28,13 @@
     </extensions>
 
     <actions>
+        <action id="Octet.ImportJposPackager"
+                class="io.github.mouadai.octet.plugin.jpos.ImportJposPackagerAction"
+                text="Import jPOS Packager as Octet Dialect..."
+                description="Convert a jPOS GenericPackager XML file into an Octet dialect in .octet/dialects">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
         <group id="Octet.DecodeSelection" text="Octet" popup="true">
             <action id="Octet.DecodeSelectionAsIso"
                     class="io.github.mouadai.octet.plugin.DecodeSelectionAsIsoAction"
