@@ -24,8 +24,9 @@ class OctetToolWindowFactory : ToolWindowFactory, DumbAware {
                 ApplicationManager.getApplication().invokeLater({ panel.reloadDialects() }, project.disposed)
             },
         )
-        val content = ContentFactory.getInstance().createContent(panel.component, null, false)
-        toolWindow.contentManager.addContent(content)
+        val factory = ContentFactory.getInstance()
+        toolWindow.contentManager.addContent(factory.createContent(panel.component, "Decode", false))
+        toolWindow.contentManager.addContent(factory.createContent(OctetBuilderPanel().component, "Build", false))
     }
 
     companion object {

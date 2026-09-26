@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE isopackager SYSTEM "genericpackager.dtd">
+<!-- Written for Octet's tests: a binary layout with BCD numerics and bitmap-driven field 127. -->
+<isopackager>
+  <isofield id="0" length="4" name="MTI" class="org.jpos.iso.IFB_NUMERIC" pad="true"/>
+  <isofield id="1" length="16" name="BITMAP" class="org.jpos.iso.IFB_BITMAP"/>
+  <isofield id="2" length="19" name="PAN" class="org.jpos.iso.IFB_LLNUM" pad="true"/>
+  <isofield id="3" length="6" name="PROCESSING CODE" class="org.jpos.iso.IFB_NUMERIC" pad="true"/>
+  <isofield id="4" length="12" name="AMOUNT" class="org.jpos.iso.IFB_NUMERIC" pad="true"/>
+  <isofield id="11" length="6" name="STAN" class="org.jpos.iso.IFB_NUMERIC" pad="true"/>
+  <isofield id="35" length="37" name="TRACK 2" class="org.jpos.iso.IFB_LLNUM" pad="false"/>
+  <isofield id="41" length="8" name="TERMINAL ID" class="org.jpos.iso.IF_CHAR"/>
+  <isofield id="44" length="25" name="ADDITIONAL RESPONSE DATA" class="org.jpos.iso.IFB_LLHCHAR"/>
+  <isofield id="52" length="8" name="PIN BLOCK" class="org.jpos.iso.IFB_BINARY"/>
+  <isofield id="55" length="255" name="ICC DATA" class="org.jpos.iso.IFB_LLLBINARY"/>
+  <isofield id="60" length="999" name="ACME PRIVATE" class="com.example.acme.IFX_LLLACMEFIELD"/>
+  <isofield id="61" length="0" name="NOT USED" class="org.jpos.iso.IF_NOP"/>
+  <isofield id="62" length="10" name="RESERVED" class="org.jpos.iso.IF_NOP"/>
+  <isofieldpackager id="63" length="11" name="POS DATA" class="org.jpos.iso.IFB_LLCHAR" packager="org.jpos.iso.packager.GenericSubFieldPackager">
+    <isofield id="1" length="2" name="TERMINAL TYPE" class="org.jpos.iso.IF_CHAR"/>
+    <isofield id="2" length="1" name="CARD PRESENT" class="org.jpos.iso.IF_CHAR"/>
+    <isofield id="3" length="8" name="CAPABILITIES" class="org.jpos.iso.IF_CHAR"/>
+  </isofieldpackager>
+  <isofield id="65" length="8" name="TERTIARY BITMAP" class="org.jpos.iso.IFB_BITMAP"/>
+  <isofieldpackager id="127" length="999" name="ACME EXTENDED DATA" class="org.jpos.iso.IFB_LLLBINARY" packager="org.jpos.iso.packager.GenericSubFieldPackager" emitBitmap="true">
+    <isofield id="0" length="8" name="BITMAP" class="org.jpos.iso.IFB_BITMAP"/>
+    <isofield id="2" length="32" name="SWITCH KEY" class="org.jpos.iso.IFB_LLCHAR"/>
+    <isofield id="3" length="6" name="ROUTING CODE" class="org.jpos.iso.IFB_NUMERIC" pad="true"/>
+    <isofield id="9" length="4" name="CAPTURE DATE" class="org.jpos.iso.IF_CHAR"/>
+  </isofieldpackager>
+</isopackager>
