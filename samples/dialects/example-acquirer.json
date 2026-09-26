@@ -1,0 +1,22 @@
+{
+  "id": "example-acquirer",
+  "name": "Example acquirer (1987 ASCII variant)",
+  "description": "Sample processor dialect: the generic 1987 ASCII layout with a shorter PAN, no field 48 and a private TLV field 63. Fictional; copy it into .octet/dialects and adapt it.",
+  "extends": "iso8583-1987-ascii",
+  "fields": {
+    "2": { "maxLength": 16 },
+    "48": { "remove": true },
+    "63": {
+      "name": "Private data (example TLV)",
+      "type": "ans",
+      "lengthType": "LLLVAR",
+      "maxLength": 999,
+      "subfields": {
+        "layout": "PRIVATE_TLV",
+        "tagLength": 2,
+        "lengthLength": 3,
+        "tags": { "01": "Terminal batch number", "02": "Merchant category note" }
+      }
+    }
+  }
+}

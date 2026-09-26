@@ -2,6 +2,9 @@
     <id>io.github.mouadai.octet</id>
     <name>Octet</name>
     <vendor url="https://github.com/mouad-ai/ISO-8583-EMV-toolkit">mouad-ai</vendor>
+    <!-- Freemium: optional="true" keeps the plugin usable without a license; see OctetLicense.
+         The code is a placeholder until JetBrains Marketplace assigns one. -->
+    <product-descriptor code="POCTET" release-date="20260926" release-version="10" optional="true"/>
 
     <description><![CDATA[
     Decode, build and diff ISO 8583 messages and EMV BER-TLV data (field 55 and more) without leaving your IDE.

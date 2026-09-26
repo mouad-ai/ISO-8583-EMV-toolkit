@@ -1,0 +1,10 @@
+{
+  "id": "example-binary-host",
+  "name": "Example binary host (TPDU with length prefix)",
+  "description": "Sample processor dialect: the generic 1987 binary layout sent as a 2-byte length, a 5-byte TPDU, then the message. Fictional; copy it into .octet/dialects and adapt it.",
+  "extends": "iso8583-1987-binary",
+  "framing": [
+    { "type": "TPDU", "prefix": "LENGTH_2_BINARY" },
+    { "type": "NONE" }
+  ]
+}

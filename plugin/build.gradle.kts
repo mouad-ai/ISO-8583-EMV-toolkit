@@ -54,3 +54,13 @@ intellijPlatform {
         }
     }
 }
+
+// Paid features stay unlocked in the sandbox IDE and in tests (see OctetLicense.DEV_PROPERTY).
+tasks {
+    runIde {
+        jvmArgs("-Doctet.license.dev=true")
+    }
+    test {
+        systemProperty("octet.license.dev", "true")
+    }
+}

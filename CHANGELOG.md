@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### M9 — Release prep
+- Marketplace freemium licensing isolated in `plugin/licensing`: `OctetLicense` (paid-feature checks, register dialog) and `LicenseStampVerifier` (JetBrains license stamp verification, following JetBrains' official sample). Paid features stay unlocked in `runIde` and tests.
+- `plugin.xml` declares an optional paid `product-descriptor` (placeholder code `POCTET` until the vendor account exists).
+- Sample dialects in `samples/dialects`: an ASCII acquirer override and a binary host with TPDU framing.
+- Dialects that `extends` another may omit `fields` (framing-only overrides validate).
+- README rewritten; Marketplace listing draft in `docs/marketplace-listing.md`.
+
 ### M8 — Diff
 - `MessageDiff` in `core`: structural diff of two decoded messages (ISO 8583 fields or EMV tags), matched by id, with repeated tags matched by occurrence and reordering tolerated.
 - `DiffReport`: plain-text list of added, removed and changed elements with their paths.

@@ -197,3 +197,18 @@ Choices made where SPEC.md leaves room, newest last.
   when its own value differs, so the summary reflects what the user would fix.
 - **Masking**: both sides are decoded masked, so the tree and the copied report never contain clear
   sensitive values unless revealed upstream.
+
+## M9 — Release prep
+
+- **Licensing lives in one package** (`plugin/licensing`), as the Marketplace docs recommend, so
+  features only call `OctetLicense.isEnabled(feature)`.
+- **Freemium via `optional="true"`** on the product descriptor: the free edition works without a
+  license, and paid features ask for one through the IDE's register dialog.
+- **Stamp checks follow JetBrains' official sample** (marketplace-makemecoffee-plugin): `key:`
+  stamps are verified with SHA1withRSA against the JetBrains roots plus a license id check,
+  `stamp:` values must be under an hour old; `eval:` values are rejected as in the sample.
+- **Unknown license state counts as enabled**: while the facade is not yet initialised, features
+  are not locked, to avoid flicker and false lock-outs at startup.
+- **Dev property** `octet.license.dev=true` unlocks everything; set for `runIde` and tests only.
+- **Product code `POCTET` is a placeholder** until mouad creates the Marketplace vendor account.
+- **`fields` is optional when a dialect `extends` another**, so a framing-only override is valid.

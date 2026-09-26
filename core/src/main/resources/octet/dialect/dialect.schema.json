@@ -6,8 +6,7 @@
   "type": "object",
   "required": [
     "id",
-    "name",
-    "fields"
+    "name"
   ],
   "additionalProperties": false,
   "properties": {
@@ -79,7 +78,8 @@
     "required": [
       "version",
       "mti",
-      "bitmap"
+      "bitmap",
+      "fields"
     ],
     "properties": {
       "fields": {
