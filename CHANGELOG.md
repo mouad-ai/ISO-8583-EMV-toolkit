@@ -10,6 +10,15 @@
 - Formatters for amounts (with currency and exponent), dates, times, ISO 4217 currencies and ISO 3166 countries.
 - DOL parsing for PDOL, CDOL1/2, DDOL, TDOL and Log Format.
 - Masking of PAN, track and cardholder name tags by default, with a reveal option.
+### M2 — ISO 8583 core
+- Dialect model and JSON loader in the dialect file format (fields keyed by number, `extends` overrides with `remove`), with path-named load errors.
+- Built-in generic dialects: ISO 8583:1987 ASCII, ISO 8583:1987 binary, ISO 8583:1993 ASCII (with tertiary bitmap support).
+- MTI in ASCII, BCD or EBCDIC with version/class/function/origin labels; primary, secondary and tertiary bitmaps in binary, hex-ASCII or hex-EBCDIC.
+- FIXED, LLVAR, LLLVAR and LLLLVAR fields; ASCII, BCD, binary and EBCDIC length prefixes; ASCII, EBCDIC, BCD (left/right pad) and binary data; types n, a, an, ans, b, z, xn.
+- Framing: none, 2-byte binary length, 4-byte ASCII length, TPDU or custom header (optionally after a length), with auto-detection.
+- Subfields: fixed slices, private TLV with character tags, and BER-TLV for field 55 via the M1 parser.
+- Best-effort decoding with byte offsets on every element and precise errors (e.g. "Field 35 (Track 2 data): LLVAR length 34 exceeds remaining 12 bytes at offset 0x4F.").
+- Encoder that re-encodes decoded messages byte-identically; property-based round-trip, truncation and corruption tests.
 ### M3 — Decode tool window (in progress)
 - Input detection in `core`: hex (spaces, newlines, `0x`, commas allowed), base64, or raw ASCII, with a manual override.
 - Hex dump layout in `core` with byte-offset ↔ text-position mapping.
