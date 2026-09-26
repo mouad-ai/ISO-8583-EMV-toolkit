@@ -7,6 +7,14 @@
 - Field values are checked per field with messages that name the field; a, an and ans character classes are enforced.
 - Field 55 editor: one row per EMV tag, values typed as amounts, dates, currencies, countries or text (or `hex:`), built into BER-TLV.
 - Exports: hex, base64, Java `byte[]` literal, Kotlin `byteArrayOf` literal and a jPOS `ISOMsg` snippet.
+### M4 — Editor and console actions
+- "Octet > Decode as ISO 8583" and "Decode as EMV TLV" in the editor and Run/Debug console context menus decode the selection in the tool window.
+- Optional console filter (Settings > Tools > Octet, off by default) turns hex dumps of 16+ bytes, contiguous or space-separated, into links that open them in the decoder.
+### M5 — Dialect authoring (in progress)
+- JSON Schema for dialect files, including processor overrides (`extends`, partial fields, `remove`).
+- Autocomplete and validation for `.octet/dialects/*.json` and user dialect files (needs the bundled JSON plugin).
+- Project and user dialect folders are listed and watched; changes publish a `DialectsChangedListener` event.
+- `docs/dialects.md` describes the format.
 
 ### M1 — TLV core
 - BER-TLV decoder and encoder with byte offsets, multi-byte tags, long-form lengths and byte-exact round trip.
@@ -33,10 +41,16 @@
 - The importer never loads the packager's DTD or any external entity.
 
 ### M3 — Decode tool window (in progress)
+### M3 — Decode tool window
 - Input detection in `core`: hex (spaces, newlines, `0x`, commas allowed), base64, or raw ASCII, with a manual override.
 - Hex dump layout in `core` with byte-offset ↔ text-position mapping.
 - Tool window: input area, format selector, tree and hex view with two-way highlighting.
-  Structured ISO 8583/TLV nodes, the dialect selector and the masking toggle follow once the M1/M2 core decoders land.
+- "Decode as EMV TLV" (default) shows every tag with name, formatted value, raw hex, set bits and DOL entries, fully expanded.
+- Sensitive tags are masked in the tree and in the hex view; a session-only "Reveal sensitive values" toggle shows them.
+- TLV parse errors are shown under the input with their offset.
+- "Decode as ISO 8583" (default) with a dialect selector (the three built-in dialects) and a framing selector (auto by default): framing, MTI with its meaning, bitmap, and every field with subfields.
+- Field 55 inside an ISO message expands into formatted EMV tags located at their exact bytes, in both binary and hex-text dialects.
+- PAN (first 6 + last 4), track 2 and other sensitive fields are masked in the tree and hex view.
 
 ### M0 — Scaffold
 - Gradle multi-module build: `core` (pure Kotlin/JVM, JUnit 5) and `plugin` (IntelliJ Platform Gradle Plugin 2.x).

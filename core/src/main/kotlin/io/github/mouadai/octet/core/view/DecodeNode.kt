@@ -11,6 +11,8 @@ data class DecodeNode(
     val offset: Int,
     val length: Int,
     val children: List<DecodeNode> = emptyList(),
+    /** Raw value bytes as hex, masked like [value] when the element is sensitive. */
+    val rawHex: String = "",
 ) {
     operator fun contains(byteOffset: Int): Boolean = byteOffset >= offset && byteOffset < offset + length
 
@@ -20,4 +22,11 @@ data class DecodeNode(
         val deeper = children.firstNotNullOfOrNull { it.pathAt(byteOffset) }
         return listOf(this) + deeper.orEmpty()
     }
+
+    /** Copy with offsets moved to `delta + offset * scale` and lengths multiplied by [scale], recursively. */
+    fun relocated(delta: Int, scale: Int = 1): DecodeNode = copy(
+        offset = delta + offset * scale,
+        length = length * scale,
+        children = children.map { it.relocated(delta, scale) },
+    )
 }

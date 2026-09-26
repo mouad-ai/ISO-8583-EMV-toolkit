@@ -12,12 +12,19 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
+    <!-- Autocomplete and validation for dialect files; everything else works without the JSON plugin. -->
+    <depends optional="true" config-file="octet-json.xml">com.intellij.modules.json</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Octet"
                     anchor="right"
                     icon="/icons/octetToolWindow.svg"
                     factoryClass="io.github.mouadai.octet.plugin.OctetToolWindowFactory"/>
+        <consoleFilterProvider implementation="io.github.mouadai.octet.plugin.OctetConsoleFilterProvider"/>
+        <applicationConfigurable parentId="tools"
+                                 id="io.github.mouadai.octet.settings"
+                                 displayName="Octet"
+                                 instance="io.github.mouadai.octet.plugin.OctetConfigurable"/>
     </extensions>
 
     <actions>
@@ -28,4 +35,21 @@
             <add-to-group group-id="ToolsMenu" anchor="last"/>
         </action>
     </actions>
+        <group id="Octet.DecodeSelection" text="Octet" popup="true">
+            <action id="Octet.DecodeSelectionAsIso"
+                    class="io.github.mouadai.octet.plugin.DecodeSelectionAsIsoAction"
+                    text="Decode as ISO 8583"
+                    description="Decode the selected hex, base64 or text as an ISO 8583 message"/>
+            <action id="Octet.DecodeSelectionAsEmv"
+                    class="io.github.mouadai.octet.plugin.DecodeSelectionAsEmvAction"
+                    text="Decode as EMV TLV"
+                    description="Decode the selected hex or base64 as EMV BER-TLV data"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
+        </group>
+    </actions>
+    <projectListeners>
+        <listener class="io.github.mouadai.octet.plugin.dialect.DialectVfsListener"
+                  topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+    </projectListeners>
 </idea-plugin>

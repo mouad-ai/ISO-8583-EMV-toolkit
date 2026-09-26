@@ -59,6 +59,18 @@ Choices made where SPEC.md leaves room, newest last.
 - **`DecodeNode` in `core`.** The tool window shows a display-neutral tree (id, name, value,
   offset, length). TLV and ISO 8583 results are adapted into it, which keeps the UI independent of
   the M1/M2 model types and keeps the offset lookup unit-testable.
+- **Hex view masks whole values.** The tree follows SPEC 6.8 (PAN keeps first 6 + last 4), but the
+  hex and ASCII columns hide every byte of a masked value, since partial masking of packed BCD
+  nibbles would be confusing. The reveal toggle lives in the panel only and is never persisted.
+- **Field 55 inside ISO 8583 is re-read by the M1 `EmvDecoder`** for formatted values and bits.
+  In hex-text dialects each TLV byte is two characters in the message, so tag offsets are scaled
+  by `valueLength / tlvBytes`; if the value is not clean hex, M2's raw children are shown instead.
+- **ISO field masking by field number**: 2 keeps first 6 + last 4, 35 uses the track 2 rule, any
+  other field or subfield the dialect marks sensitive is fully masked.
+- **Pasted ISO text made only of hex digits is read as hex** by input auto-detection; pick "ASCII"
+  as the input format to decode it as characters.
+- **`DecodeView` is the tool window's single core entry point** (bytes + mode + reveal in, tree +
+  masked ranges + problems out), so the Swing panel holds no decoding logic.
 
 ## M2 — ISO 8583 core
 
@@ -144,3 +156,32 @@ Choices made where SPEC.md leaves room, newest last.
   editing header bytes can come later.
 - **jPOS snippet** uses `ISOMsg.set(int, String)` for text fields and `ISOUtil.hex2byte` for type `b`
   fields. It names the dialect but does not generate a packager.
+## M4
+
+- **Console hex detection threshold: 16 bytes**, written as contiguous hex digits or byte pairs
+  separated by single spaces, not starting or ending inside a longer hex word. Shorter runs are
+  mostly ids and hashes' prefixes; odd-length runs are skipped. The whole run becomes the link.
+- **Console links keep the tool window's current mode and dialect**, since a log line does not say
+  what it contains; the editor actions pick ISO 8583 or EMV TLV explicitly.
+- **Settings are application-level** (`octet.xml` in the IDE config dir) and the console filter is
+  checked per line, so toggling it applies to new output without restarting the run.
+
+## M5 — Dialect authoring (schema, folders, overrides)
+
+- **Fields are a map keyed by field number** (`"fields": {"2": {...}}`), not an array. It makes
+  per-field overrides natural and lets the schema reject duplicate or out-of-range numbers (2-192).
+- **Processor overrides via `extends`.** A dialect names a base dialect and lists only the fields
+  it changes; entries are merged property by property, `"remove": true` drops a field, and a field
+  new to the base must be complete. The schema switches between complete and partial field rules
+  on whether `extends` is present (draft-07 `if`/`then`).
+- **Schema checks what JSON Schema can**: enums, required properties, field-number range, LLVAR
+  ≤ 99 and LLLVAR ≤ 999, `HEADER` framing needs a length. Cross-file checks (unknown `extends`
+  id, cycles) belong to the loader.
+- **Schema lives in `core` resources** (`octet/dialect/dialect.schema.json`) so core tests can
+  check the built-in dialects against it; the plugin maps it onto dialect files.
+- **JSON plugin is an optional dependency.** Schema registration sits in `octet-json.xml`, so
+  Octet still loads in IDEs without the JSON plugin, just without dialect autocomplete.
+- **Folders**: project `.octet/dialects/*.json` (under the project dir and any content root, not
+  recursive) and user `<config dir>/octet/dialects/*.json`. A project-level VFS listener publishes
+  `DialectsChangedListener.TOPIC` once per batch of changes touching those folders.
+- **YAML dialect files** are not mapped yet; JSON only until the loader supports YAML.
