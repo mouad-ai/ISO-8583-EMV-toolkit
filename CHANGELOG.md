@@ -19,6 +19,13 @@
 - Subfields: fixed slices, private TLV with character tags, and BER-TLV for field 55 via the M1 parser.
 - Best-effort decoding with byte offsets on every element and precise errors (e.g. "Field 35 (Track 2 data): LLVAR length 34 exceeds remaining 12 bytes at offset 0x4F.").
 - Encoder that re-encodes decoded messages byte-identically; property-based round-trip, truncation and corruption tests.
+### M6 — jPOS import
+- Import jPOS `GenericPackager` XML into an Octet dialect (Tools | Import jPOS Packager as Octet Dialect), written to `.octet/dialects/<id>.json` and opened in the editor.
+- jPOS field-class mapping table as a resource (`octet/jpos/jpos-field-classes.json`): IFA_, IFB_, IFE_, IF_CHAR/IF_ECHAR, bitmaps, amounts, `pad` handling; unmapped classes become raw binary fields with a warning.
+- Sub-field packagers: bitmap-driven (`emitBitmap`) to the new `BITMAP` layout, fixed positional to `FIXED`, BER-TLV to `BER_TLV`; field 55 as binary defaults to BER-TLV.
+- Bitmap-driven subfields (`"layout": "BITMAP"`) now decode, with offsets and per-subfield errors such as "Field 127.3 (Routing info): ...".
+- The importer never loads the packager's DTD or any external entity.
+
 ### M3 — Decode tool window (in progress)
 - Input detection in `core`: hex (spaces, newlines, `0x`, commas allowed), base64, or raw ASCII, with a manual override.
 - Hex dump layout in `core` with byte-offset ↔ text-position mapping.

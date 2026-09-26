@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE isopackager SYSTEM "genericpackager.dtd">
+<!-- Written for Octet's tests: a small ASCII layout in jPOS GenericPackager form. -->
+<isopackager>
+  <isofield id="0" length="4" name="MESSAGE TYPE INDICATOR" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="1" length="16" name="BIT MAP" class="org.jpos.iso.IFA_BITMAP"/>
+  <isofield id="2" length="19" name="PAN - PRIMARY ACCOUNT NUMBER" class="org.jpos.iso.IFA_LLNUM"/>
+  <isofield id="3" length="6" name="PROCESSING CODE" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="4" length="12" name="AMOUNT, TRANSACTION" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="7" length="10" name="TRANSMISSION DATE AND TIME" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="11" length="6" name="SYSTEM TRACE AUDIT NUMBER" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="14" length="4" name="EXPIRATION DATE" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="22" length="3" name="POS ENTRY MODE" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="28" length="9" name="AMOUNT, TRANSACTION FEE" class="org.jpos.iso.IFA_AMOUNT"/>
+  <isofield id="35" length="37" name="TRACK 2 DATA" class="org.jpos.iso.IFA_LLNUM"/>
+  <isofield id="41" length="8" name="CARD ACCEPTOR TERMINAL ID" class="org.jpos.iso.IF_CHAR"/>
+  <isofield id="48" length="999" name="ADDITIONAL DATA - PRIVATE" class="org.jpos.iso.IFA_LLLCHAR"/>
+  <isofield id="49" length="3" name="CURRENCY CODE, TRANSACTION" class="org.jpos.iso.IF_CHAR"/>
+  <isofield id="52" length="8" name="PIN DATA" class="org.jpos.iso.IFA_BINARY"/>
+  <isofield id="55" length="255" name="ICC DATA" class="org.jpos.iso.IFA_LLLBINARY"/>
+  <isofield id="64" length="8" name="MAC" class="org.jpos.iso.IFA_BINARY"/>
+  <isofield id="90" length="42" name="ORIGINAL DATA ELEMENTS" class="org.jpos.iso.IFA_NUMERIC"/>
+  <isofield id="128" length="8" name="MAC 2" class="org.jpos.iso.IFA_BINARY"/>
+</isopackager>
