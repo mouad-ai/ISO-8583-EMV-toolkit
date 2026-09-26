@@ -3,8 +3,9 @@
 ## [Unreleased]
 
 ### M9 — Release prep
-- Marketplace freemium licensing isolated in `plugin/licensing`: `OctetLicense` (paid-feature checks, register dialog) and `LicenseStampVerifier` (JetBrains license stamp verification, following JetBrains' official sample). Paid features stay unlocked in `runIde` and tests.
-- `plugin.xml` declares an optional paid `product-descriptor` (placeholder code `POCTET` until the vendor account exists).
+- Renamed from the working name Octet to **Cardwire**: plugin id `io.github.mouadai.cardwire`, product code `PCARDWIRE`, packages, tool window, project dialect folder `.cardwire/dialects` (was `.octet/dialects`).
+- Marketplace freemium licensing isolated in `plugin/licensing`: `CardwireLicense` (paid-feature checks, register dialog) and `LicenseStampVerifier` (JetBrains license stamp verification, following JetBrains' official sample). Paid features stay unlocked in `runIde` and tests.
+- `plugin.xml` declares an optional paid `product-descriptor` (code `PCARDWIRE`).
 - Sample dialects in `samples/dialects`: an ASCII acquirer override and a binary host with TPDU framing.
 - Dialects that `extends` another may omit `fields` (framing-only overrides validate).
 - README rewritten; Marketplace listing draft in `docs/marketplace-listing.md`.
@@ -12,12 +13,12 @@
 - Screenshot kit: sample files in `docs/screenshot-samples` (open as a project in `runIde`) and a step-by-step `docs/screenshot-guide.md`.
 - Paid features check the license: the Build and Diff tabs show an "Enter license" note when unlicensed, project and user dialects are not offered, jPOS import opens the register dialog, and console hex detection stays off.
 - "Diff" tab in the tool window, using the same dialects as the decoder and reloading with them.
-- Dialect files show a banner with their load error, or a note when dialects need Octet Pro; banners refresh when any dialect file changes.
+- Dialect files show a banner with their load error, or a note when dialects need Cardwire Pro; banners refresh when any dialect file changes.
 
 ### M8 — Diff
 - `MessageDiff` in `core`: structural diff of two decoded messages (ISO 8583 fields or EMV tags), matched by id, with repeated tags matched by occurrence and reordering tolerated.
 - `DiffReport`: plain-text list of added, removed and changed elements with their paths.
-- `OctetDiffPanel`: paste two messages, see one merged tree with changes highlighted, copy the report. Decodes both sides the same way (ISO 8583 with a dialect, or EMV TLV), masked.
+- `CardwireDiffPanel`: paste two messages, see one merged tree with changes highlighted, copy the report. Decodes both sides the same way (ISO 8583 with a dialect, or EMV TLV), masked.
 
 ### M7 — Builder
 - "Build" tab in the tool window: pick a dialect, MTI and framing, fill fields in a table, build, and copy the output.
@@ -25,11 +26,11 @@
 - Field 55 editor: one row per EMV tag, values typed as amounts, dates, currencies, countries or text (or `hex:`), built into BER-TLV.
 - Exports: hex, base64, Java `byte[]` literal, Kotlin `byteArrayOf` literal and a jPOS `ISOMsg` snippet.
 ### M4 — Editor and console actions
-- "Octet > Decode as ISO 8583" and "Decode as EMV TLV" in the editor and Run/Debug console context menus decode the selection in the tool window.
-- Optional console filter (Settings > Tools > Octet, off by default) turns hex dumps of 16+ bytes, contiguous or space-separated, into links that open them in the decoder.
+- "Cardwire > Decode as ISO 8583" and "Decode as EMV TLV" in the editor and Run/Debug console context menus decode the selection in the tool window.
+- Optional console filter (Settings > Tools > Cardwire, off by default) turns hex dumps of 16+ bytes, contiguous or space-separated, into links that open them in the decoder.
 ### M5 — Dialect authoring (in progress)
 - JSON Schema for dialect files, including processor overrides (`extends`, partial fields, `remove`).
-- Autocomplete and validation for `.octet/dialects/*.json` and user dialect files (needs the bundled JSON plugin).
+- Autocomplete and validation for `.cardwire/dialects/*.json` and user dialect files (needs the bundled JSON plugin).
 - Project and user dialect folders are listed and watched; changes publish a `DialectsChangedListener` event.
 - `docs/dialects.md` describes the format.
 - The decode window's dialect picker lists project and user dialects after the built-ins, labelled by scope, and reloads when a dialect file changes. A dialect file may extend a built-in or another dialect file; files that fail to load are skipped and named in the status line.
@@ -52,8 +53,8 @@
 - Best-effort decoding with byte offsets on every element and precise errors (e.g. "Field 35 (Track 2 data): LLVAR length 34 exceeds remaining 12 bytes at offset 0x4F.").
 - Encoder that re-encodes decoded messages byte-identically; property-based round-trip, truncation and corruption tests.
 ### M6 — jPOS import
-- Import jPOS `GenericPackager` XML into an Octet dialect (Tools | Import jPOS Packager as Octet Dialect), written to `.octet/dialects/<id>.json` and opened in the editor.
-- jPOS field-class mapping table as a resource (`octet/jpos/jpos-field-classes.json`): IFA_, IFB_, IFE_, IF_CHAR/IF_ECHAR, bitmaps, amounts, `pad` handling; unmapped classes become raw binary fields with a warning.
+- Import jPOS `GenericPackager` XML into an Cardwire dialect (Tools | Import jPOS Packager as Cardwire Dialect), written to `.cardwire/dialects/<id>.json` and opened in the editor.
+- jPOS field-class mapping table as a resource (`cardwire/jpos/jpos-field-classes.json`): IFA_, IFB_, IFE_, IF_CHAR/IF_ECHAR, bitmaps, amounts, `pad` handling; unmapped classes become raw binary fields with a warning.
 - Sub-field packagers: bitmap-driven (`emitBitmap`) to the new `BITMAP` layout, fixed positional to `FIXED`, BER-TLV to `BER_TLV`; field 55 as binary defaults to BER-TLV.
 - Bitmap-driven subfields (`"layout": "BITMAP"`) now decode, with offsets and per-subfield errors such as "Field 127.3 (Routing info): ...".
 - The importer never loads the packager's DTD or any external entity.
@@ -71,6 +72,6 @@
 
 ### M0 — Scaffold
 - Gradle multi-module build: `core` (pure Kotlin/JVM, JUnit 5) and `plugin` (IntelliJ Platform Gradle Plugin 2.x).
-- Empty "Octet" tool window built with Kotlin UI DSL v2.
+- Empty "Cardwire" tool window built with Kotlin UI DSL v2.
 - `NoNetworkTest` fails the build if `core` references `java.net`, `javax.net` or common HTTP client libraries.
 - GitHub Actions CI: tests, `buildPlugin` and `verifyPlugin`.

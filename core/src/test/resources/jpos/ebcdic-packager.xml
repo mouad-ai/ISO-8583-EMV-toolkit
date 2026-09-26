@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Written for Octet's tests: an EBCDIC layout. -->
+<!-- Written for Cardwire's tests: an EBCDIC layout. -->
 <isopackager>
   <isofield id="0" length="4" name="MTI" class="org.jpos.iso.IFE_NUMERIC"/>
   <isofield id="1" length="16" name="BITMAP" class="org.jpos.iso.IFE_BITMAP"/>

@@ -1,7 +1,7 @@
 # Marketplace listing (draft)
 
 Text for the JetBrains Marketplace page. The plugin description in `plugin.xml` uses the same
-wording. Replace "Octet" once the final name has passed a trademark check, and keep "EMV" and
+wording. Keep "EMV" and
 "ISO" out of the product name itself (they may be used descriptively).
 
 ## Short description
@@ -12,7 +12,7 @@ message specs.
 ## Description
 
 Payment developers read raw messages all day: hex dumps from logs, test tools and bug tickets,
-ISO 8583 layouts that differ per processor, and field 55 blobs nobody can read by eye. Octet
+ISO 8583 layouts that differ per processor, and field 55 blobs nobody can read by eye. Cardwire
 decodes them where you already work, without sending card data to a website.
 
 - **Offline and private**: no network calls, no telemetry. PANs and other sensitive values are
@@ -50,8 +50,7 @@ Step by step, with sample files: [screenshot-guide.md](screenshot-guide.md).
 
 ## Before publishing
 
-- Create the paid plugin under the vendor account (Mouad EL MRABATE), and put the product code JetBrains
-  assigns into `plugin.xml` (`product-descriptor`) and `OctetLicense.PRODUCT_CODE`, replacing
-  the `POCTET` placeholder.
+- Create the paid plugin under the vendor account (Mouad EL MRABATE) and request product code
+  `PCARDWIRE`. If JetBrains assigns a different code, change it in `plugin.xml`
+  (`product-descriptor`) and `CardwireLicense.PRODUCT_CODE`.
 - Set `release-date` and `release-version` in the `product-descriptor` for each release.
-- Choose the final name and update `plugin.xml`, the tool window title and this text.

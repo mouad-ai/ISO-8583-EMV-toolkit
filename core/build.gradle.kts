@@ -35,6 +35,6 @@ tasks.test {
     val mainClasses = sourceSets.main.get().output.classesDirs
     inputs.files(mainClasses).withPropertyName("mainClasses")
     val mainClassesPath = mainClasses.asPath
-    systemProperty("octet.core.mainClasses", mainClassesPath)
-    systemProperty("octet.core.mainSources", layout.projectDirectory.dir("src/main").asFile.absolutePath)
+    systemProperty("cardwire.core.mainClasses", mainClassesPath)
+    systemProperty("cardwire.core.mainSources", layout.projectDirectory.dir("src/main").asFile.absolutePath)
 }

@@ -14,7 +14,7 @@ Checklist for the JetBrains Marketplace screenshots listed in
    ```
 
    The first run downloads IntelliJ IDEA 2025.3 (a few GB) and takes a while. On Windows use
-   `gradlew.bat runIde`. Paid features are unlocked in the sandbox (`-Doctet.license.dev=true` is set
+   `gradlew.bat runIde`. Paid features are unlocked in the sandbox (`-Dcardwire.license.dev=true` is set
    by the build), so no license is needed.
 3. In the sandbox IDE, **File > Open** the folder `docs/screenshot-samples` and trust it.
 4. **Theme**: use one theme for every shot. Settings > Appearance & Behavior > Appearance >
@@ -27,13 +27,13 @@ Checklist for the JetBrains Marketplace screenshots listed in
    On macOS a window-sizing tool (Rectangle, Moom) or `Window > Zoom` then resize helps; on Windows
    use PowerToys FancyZones or a fixed layout. Capture the window only, not the desktop.
    On a HiDPI/Retina screen the capture is 2400 × 1520: that is fine, the Marketplace scales it.
-7. **Octet tool window**: it opens on the right (View > Tool Windows > Octet). Drag its edge so it
+7. **Cardwire tool window**: it opens on the right (View > Tool Windows > Cardwire). Drag its edge so it
    takes about 60% of the width. Masking stays on (the default); never tick "Reveal" for a shot.
 
 ## 1. Decode tab: message, tree and hex view
 
 1. Open `iso8583-authorization-request.hex` and copy its content.
-2. Octet tool window > **Decode** tab: paste into the input, Input **Auto**, Decode as **ISO 8583**,
+2. Cardwire tool window > **Decode** tab: paste into the input, Input **Auto**, Decode as **ISO 8583**,
    Dialect **ISO 8583:1987 ASCII**, Framing **Auto**. Click **Decode**.
 3. In the tree, click **DE 43 Card acceptor name/location** so its bytes are highlighted in the hex view.
 4. In frame: the input (top), the tree with MTI, bitmap, DE 2 masked as `411111******1111`, and the
@@ -50,15 +50,15 @@ Checklist for the JetBrains Marketplace screenshots listed in
 
 ## 3. Dialect file with autocomplete
 
-1. Open `.octet/dialects/acme-acquirer.json`.
+1. Open `.cardwire/dialects/acme-acquirer.json`.
 2. Put the caret inside field `"63"` after `"lengthType": ` , delete the value and press
    **Ctrl+Space** (macOS: **⌃Space**) to show the list (FIXED, LLVAR, LLLVAR...).
 3. In frame: the file with `extends`, the partial field overrides and the completion popup. Keep
-   the Octet tool window closed for this one.
+   the Cardwire tool window closed for this one.
 
 ## 4. Diff tab
 
-1. Octet tool window > **Diff** tab. Decode as **ISO 8583**, Dialect **ISO 8583:1987 ASCII**.
+1. Cardwire tool window > **Diff** tab. Decode as **ISO 8583**, Dialect **ISO 8583:1987 ASCII**.
 2. Paste `diff-expected.hex` into the left box and `diff-actual.hex` into the right box. Click **Compare**.
 3. Expand **DE 55** in the result so the changed 9F02 amount (15.00 to 25.00 USD) and the TVR
    change are visible, with DE 4, DE 11 changed and DE 23 removed.
@@ -66,7 +66,7 @@ Checklist for the JetBrains Marketplace screenshots listed in
 
 ## 5. Builder
 
-1. Octet tool window > **Build** tab. Dialect **ISO 8583:1987 ASCII**, MTI `0100`.
+1. Cardwire tool window > **Build** tab. Dialect **ISO 8583:1987 ASCII**, MTI `0100`.
 2. Tick and fill: DE 2 `4111111111111111`, DE 3 `000000`, DE 4 `000000001500`, DE 11 `000123`,
    DE 41 `TERM0001`, DE 49 `840`.
 3. Click **Edit EMV Tags…** and add 9F02 amount `15.00`, 5F2A currency `840`, 9A date `2026-09-26`,
@@ -76,15 +76,15 @@ Checklist for the JetBrains Marketplace screenshots listed in
 
 ## 6. Error banner on a broken dialect (optional)
 
-1. Open `.octet/dialects/broken-host.json`.
-2. The red banner at the top reads "Octet cannot load this dialect: extends: unknown dialect
+1. Open `.cardwire/dialects/broken-host.json`.
+2. The red banner at the top reads "Cardwire cannot load this dialect: extends: unknown dialect
    'iso8583-1987-ascci'". If it does not show, save the file once (Ctrl+S) to refresh it.
 3. In frame: the banner and the misspelled `extends` line.
 
 ## 7. Decode a selection from a log (optional)
 
 1. Open `payment-switch.log`. On the third line, select the hex after `raw=` (double-click selects it).
-2. Right-click > **Octet > Decode as ISO 8583**. The Decode tab opens with the message.
+2. Right-click > **Cardwire > Decode as ISO 8583**. The Decode tab opens with the message.
 3. In frame: the log with the selection and the context menu open, or the result next to the log.
 
 ## Upload

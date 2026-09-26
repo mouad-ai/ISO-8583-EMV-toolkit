@@ -1,3 +1,3 @@
-rootProject.name = "octet"
+rootProject.name = "cardwire"
 
 include(":core", ":plugin")

@@ -49,5 +49,5 @@ jobs:
       - name: Upload plugin zip
         uses: actions/upload-artifact@v4
         with:
-          name: octet-plugin
+          name: cardwire-plugin
           path: plugin/build/distributions/*.zip

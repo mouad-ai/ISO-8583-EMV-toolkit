@@ -11,7 +11,7 @@ cryptogram and dates are fake.
 | `emv-field55.hex` | Field 55 on its own (EMV TLV mode) |
 | `diff-expected.hex`, `diff-actual.hex` | Diff tab: amount, STAN, a missing field and a TVR bit differ |
 | `payment-switch.log` | "Decode as ISO 8583" on a selection in the editor |
-| `.octet/dialects/acme-acquirer.json` | Dialect autocomplete (valid processor override) |
-| `.octet/dialects/broken-host.json` | Error banner (extends a misspelled dialect id) |
+| `.cardwire/dialects/acme-acquirer.json` | Dialect autocomplete (valid processor override) |
+| `.cardwire/dialects/broken-host.json` | Error banner (extends a misspelled dialect id) |
 
 See [../screenshot-guide.md](../screenshot-guide.md) for the step-by-step guide.
