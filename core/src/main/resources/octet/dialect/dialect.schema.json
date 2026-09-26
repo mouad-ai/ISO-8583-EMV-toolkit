@@ -554,7 +554,7 @@
             }
           },
           "then": {
-            "description": "A bitmap followed by the subfields it announces, numbered from 1. Not yet supported by the decoder.",
+            "description": "A bitmap followed by the subfields it announces, numbered from 1. No continuation bit.",
             "additionalProperties": false,
             "required": [
               "bitmapLength",
@@ -563,7 +563,7 @@
             "properties": {
               "layout": true,
               "bitmapLength": {
-                "description": "Bitmap size in bytes.",
+                "description": "Bitmap size in bytes (binary form; hex encodings take 2 characters per byte).",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 16
@@ -573,7 +573,8 @@
                   "BINARY",
                   "HEX_ASCII",
                   "HEX_EBCDIC"
-                ]
+                ],
+                "default": "BINARY"
               },
               "fields": {
                 "type": "object",
@@ -582,7 +583,8 @@
                 },
                 "additionalProperties": {
                   "$ref": "#/definitions/field"
-                }
+                },
+                "description": "Subfields keyed \"1\" up to 8 x bitmapLength, each a complete field definition."
               }
             }
           }

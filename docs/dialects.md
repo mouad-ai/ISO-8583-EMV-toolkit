@@ -82,7 +82,7 @@ whole layout, name the base dialect in `extends` and list only what changes:
 | `FIXED`       | Fixed-position slices (e.g. field 90)       | `fields`: ordered `{ name, length }` slices, numbered from 1 |
 | `BER_TLV`     | EMV data such as field 55                   | none                                                 |
 | `PRIVATE_TLV` | Tag-length-value in fields 48, 62, 63, 126… | `tagLength`, `lengthLength`, encodings, tag names    |
-| `BITMAP`      | A bitmap followed by the subfields it flags | `bitmapLength`, `bitmapEncoding`, numbered `fields` (not decoded yet) |
+| `BITMAP`      | A bitmap followed by the subfields it flags | `bitmapLength`, `bitmapEncoding` (default `BINARY`), numbered `fields` |
 
 `PRIVATE_TLV` tags and lengths currently have to use the field's own character encoding; other
 `tagEncoding`/`lengthEncoding` values are accepted by the schema but not decoded yet.
