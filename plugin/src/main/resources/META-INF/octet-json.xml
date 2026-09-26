@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="JavaScript.JsonSchema">
+        <ProviderFactory implementation="io.github.mouadai.octet.plugin.dialect.DialectSchemaProviderFactory"/>
+    </extensions>
+</idea-plugin>

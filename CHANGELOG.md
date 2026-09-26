@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### M5 — Dialect authoring (in progress)
+- JSON Schema for dialect files, including processor overrides (`extends`, partial fields, `remove`).
+- Autocomplete and validation for `.octet/dialects/*.json` and user dialect files (needs the bundled JSON plugin).
+- Project and user dialect folders are listed and watched; changes publish a `DialectsChangedListener` event.
+- `docs/dialects.md` describes the format.
+
 ### M1 — TLV core
 - BER-TLV decoder and encoder with byte offsets, multi-byte tags, long-form lengths and byte-exact round trip.
 - Best-effort parsing: malformed or truncated input returns the decoded part plus errors with offsets; unknown tags decode structurally.
