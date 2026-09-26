@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### M8 — Diff
+- `MessageDiff` in `core`: structural diff of two decoded messages (ISO 8583 fields or EMV tags), matched by id, with repeated tags matched by occurrence and reordering tolerated.
+- `DiffReport`: plain-text list of added, removed and changed elements with their paths.
+- `OctetDiffPanel`: paste two messages, see one merged tree with changes highlighted, copy the report. Decodes both sides the same way (ISO 8583 with a dialect, or EMV TLV), masked.
+
 ### M7 — Builder
 - "Build" tab in the tool window: pick a dialect, MTI and framing, fill fields in a table, build, and copy the output.
 - Field values are checked per field with messages that name the field; a, an and ans character classes are enforced.
@@ -40,7 +45,6 @@
 - Bitmap-driven subfields (`"layout": "BITMAP"`) now decode, with offsets and per-subfield errors such as "Field 127.3 (Routing info): ...".
 - The importer never loads the packager's DTD or any external entity.
 
-### M3 — Decode tool window (in progress)
 ### M3 — Decode tool window
 - Input detection in `core`: hex (spaces, newlines, `0x`, commas allowed), base64, or raw ASCII, with a manual override.
 - Hex dump layout in `core` with byte-offset ↔ text-position mapping.

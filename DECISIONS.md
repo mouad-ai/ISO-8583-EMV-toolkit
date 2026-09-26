@@ -185,3 +185,15 @@ Choices made where SPEC.md leaves room, newest last.
   recursive) and user `<config dir>/octet/dialects/*.json`. A project-level VFS listener publishes
   `DialectsChangedListener.TOPIC` once per batch of changes touching those folders.
 - **YAML dialect files** are not mapped yet; JSON only until the loader supports YAML.
+
+## M8 — Diff
+
+- **Diff runs on the display tree (`DecodeNode`)**, not on decoder-specific models, so one diff covers
+  ISO 8583 fields, subfields and EMV tags, and compares values exactly as the user sees them.
+- **Matching**: siblings are matched by id; the n-th repeat of an id is matched with the n-th repeat
+  on the other side (key `id#n`). Reordered elements count as unchanged. The result keeps the right
+  side's order; a removed element is shown right after its left-side predecessor.
+- **Counting**: added and removed subtrees count once at their top; a parent counts as changed only
+  when its own value differs, so the summary reflects what the user would fix.
+- **Masking**: both sides are decoded masked, so the tree and the copied report never contain clear
+  sensitive values unless revealed upstream.
