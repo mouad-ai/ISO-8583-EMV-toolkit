@@ -125,7 +125,7 @@ class DialectLoaderTest {
                 "fields.2.type: unknown type 'q' (expected n, a, an, ans, b, z, xn or custom)",
                 "fields.3.maxLength: 100 does not fit a LLVAR prefix (max 99)",
                 "fields.4.subfields.layout: unknown layout 'XML' (expected FIXED, BER_TLV, PRIVATE_TLV or BITMAP)",
-                "fields.5.subfields.layout: BITMAP subfields are not supported yet",
+                "fields.5.subfields.bitmapLength: is required",
             ),
             result.errors,
         )

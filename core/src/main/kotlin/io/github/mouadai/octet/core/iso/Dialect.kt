@@ -142,9 +142,11 @@ data class FieldSpec(
     val padding: Padding? = null,
     val sensitive: Boolean = false,
     val subfields: SubfieldLayout? = null,
+    /** Dotted position for subfields, e.g. "127.3"; null for top-level fields. */
+    val path: String? = null,
 ) {
     /** "Field 35 (Track 2 data)", the prefix of every error message about this field. */
-    val label: String get() = "Field $id ($name)"
+    val label: String get() = "Field ${path ?: id} ($name)"
 }
 
 /** How the value of a field splits into child elements (SPEC 6.4). */
@@ -169,6 +171,18 @@ sealed interface SubfieldLayout {
 
     /** EMV BER-TLV (field 55). Children come from the [BerTlvSubfieldDecoder] given to [IsoDecoder]. */
     data object BerTlv : SubfieldLayout
+
+    /**
+     * A bitmap of [bitmapLength] bytes (in binary form) followed by the subfields whose bits are set,
+     * numbered from 1, as in the private fields 126/127 of many dialects. Each subfield is a full
+     * [FieldSpec] with its own length type and encodings. There is no continuation bit: all
+     * `8 * bitmapLength` bits number subfields.
+     */
+    data class Bitmapped(
+        val bitmapLength: Int,
+        val bitmapEncoding: BitmapEncoding,
+        val fields: Map<Int, FieldSpec>,
+    ) : SubfieldLayout
 }
 
 data class SubfieldSpec(val id: String, val name: String, val length: Int, val sensitive: Boolean = false)

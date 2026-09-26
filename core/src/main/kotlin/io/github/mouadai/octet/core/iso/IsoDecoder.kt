@@ -45,6 +45,9 @@ class IsoDecoder(private val berTlvDecoder: BerTlvSubfieldDecoder? = EmvBerTlvSu
 
     private inner class Session(val raw: ByteArray, val dialect: Dialect, val framing: FramingSpec) {
         var pos = 0
+
+        /** End of the region being decoded: the buffer, or a field value while decoding its subfields. */
+        var limit = raw.size
         val errors = ArrayList<DecodeError>()
         var frameLength: Int? = null
         var header: ByteArray? = null
@@ -62,7 +65,7 @@ class IsoDecoder(private val berTlvDecoder: BerTlvSubfieldDecoder? = EmvBerTlvSu
             return DecodeResult(IsoMessage(dialect, framing, frameLength, header, mti, bitmap, fields, raw), errors)
         }
 
-        private fun remaining() = raw.size - pos
+        private fun remaining() = limit - pos
 
         private fun fail(message: String, offset: Int = pos, fieldId: Int? = null): Boolean {
             errors.add(DecodeError("$message at offset ${hexOffset(offset)}.", offset, fieldId))
@@ -76,7 +79,9 @@ class IsoDecoder(private val berTlvDecoder: BerTlvSubfieldDecoder? = EmvBerTlvSu
             if (!decodeMti()) return
             if (!decodeBitmaps()) return
             for (id in bitmap!!.present) {
-                if (!decodeField(id)) return
+                val spec = dialect.field(id)
+                    ?: run { fail("Field $id is present in the bitmap but not defined in dialect '${dialect.name}'", pos, id); return }
+                fields[id] = decodeElement(spec, id.toString(), id) ?: return
             }
             if (remaining() > 0) fail("${remaining()} unexpected trailing byte(s) after the last field")
         }
@@ -150,9 +155,12 @@ class IsoDecoder(private val berTlvDecoder: BerTlvSubfieldDecoder? = EmvBerTlvSu
             return true
         }
 
-        private fun decodeField(id: Int): Boolean {
-            val spec = dialect.field(id)
-                ?: return fail("Field $id is present in the bitmap but not defined in dialect '${dialect.name}'", pos, id)
+        /**
+         * Decodes one data element or bitmap-driven subfield at [pos]. Returns null after recording an
+         * error when the element cannot be decoded; [errorField] is the top-level field to blame.
+         */
+        private fun decodeElement(spec: FieldSpec, elementId: String, errorField: Int): FieldValue? {
+            val id = errorField
             val start = pos
             val units: Int
             val prefixSize = FieldCodec.prefixSize(spec.lengthType, spec.lengthEncoding)
@@ -160,44 +168,89 @@ class IsoDecoder(private val berTlvDecoder: BerTlvSubfieldDecoder? = EmvBerTlvSu
                 units = spec.maxLength
             } else {
                 if (remaining() < prefixSize) {
-                    return fail("${spec.label}: ${spec.lengthType.name} length prefix needs $prefixSize bytes but only ${remaining()} remain", start, id)
+                    return failNull("${spec.label}: ${spec.lengthType.name} length prefix needs $prefixSize bytes but only ${remaining()} remain", start, id)
                 }
                 units = try {
                     FieldCodec.decodePrefix(take(prefixSize), spec.lengthType, spec.lengthEncoding)
                 } catch (e: CodecException) {
-                    return fail("${spec.label}: ${e.message}", start, id)
+                    return failNull("${spec.label}: ${e.message}", start, id)
                 }
                 if (units > spec.maxLength) {
-                    return fail("${spec.label}: ${spec.lengthType.name} length $units exceeds maximum ${spec.maxLength}", start, id)
+                    return failNull("${spec.label}: ${spec.lengthType.name} length $units exceeds maximum ${spec.maxLength}", start, id)
                 }
             }
             val size = FieldCodec.byteCount(spec, units)
             if (size > remaining()) {
                 val what = if (spec.lengthType == LengthType.FIXED) "fixed length $units" else "${spec.lengthType.name} length $units"
-                return fail("${spec.label}: $what exceeds remaining ${remaining()} bytes", start, id)
+                return failNull("${spec.label}: $what exceeds remaining ${remaining()} bytes", start, id)
             }
             val valueStart = pos
             val bytes = take(size)
             val value = try {
                 FieldCodec.decodeValue(spec, bytes, units)
             } catch (e: CodecException) {
-                return fail("${spec.label}: ${e.message}", valueStart, id)
+                return failNull("${spec.label}: ${e.message}", valueStart, id)
             }
-            val children = spec.subfields?.let { decodeSubfields(spec, it, value, bytes, valueStart) } ?: emptyList()
-            fields[id] = FieldValue(
-                id = id.toString(), name = spec.name, raw = raw.copyOfRange(start, pos), value = value,
+            val children = spec.subfields?.let { decodeSubfields(spec, it, value, bytes, valueStart, errorField) } ?: emptyList()
+            return FieldValue(
+                id = elementId, name = spec.name, raw = raw.copyOfRange(start, pos), value = value,
                 offset = start, length = pos - start, prefixLength = valueStart - start,
                 sensitive = spec.sensitive, children = children,
             )
-            return true
         }
 
-        private fun decodeSubfields(spec: FieldSpec, layout: SubfieldLayout, value: String, bytes: ByteArray, valueStart: Int): List<FieldValue> =
+        private fun failNull(message: String, offset: Int, fieldId: Int): FieldValue? {
+            fail(message, offset, fieldId)
+            return null
+        }
+
+        private fun decodeSubfields(
+            spec: FieldSpec, layout: SubfieldLayout, value: String, bytes: ByteArray, valueStart: Int, errorField: Int,
+        ): List<FieldValue> =
             when (layout) {
                 is SubfieldLayout.Fixed -> decodeFixed(spec, layout, value, valueStart)
                 is SubfieldLayout.PrivateTlv -> decodePrivateTlv(spec, layout, value, valueStart)
                 SubfieldLayout.BerTlv -> decodeBerTlv(spec, bytes, valueStart)
+                is SubfieldLayout.Bitmapped -> decodeBitmapped(spec, layout, valueStart, valueStart + bytes.size, errorField)
             }
+
+        /** Decodes the value region [valueStart]..[valueEnd] as a bitmap plus the subfields it flags. */
+        private fun decodeBitmapped(spec: FieldSpec, layout: SubfieldLayout.Bitmapped, valueStart: Int, valueEnd: Int, errorField: Int): List<FieldValue> {
+            val savedPos = pos
+            val savedLimit = limit
+            pos = valueStart
+            limit = valueEnd
+            val out = ArrayList<FieldValue>()
+            try {
+                val size = if (layout.bitmapEncoding == BitmapEncoding.BINARY) layout.bitmapLength else layout.bitmapLength * 2
+                if (remaining() < size) {
+                    fail("${spec.label}: subfield bitmap needs $size bytes but only ${remaining()} remain", pos, errorField)
+                    return out
+                }
+                val bitmapStart = pos
+                val bitmapBytes = take(size)
+                val bits = try {
+                    HeaderCodec.decodeBitmap(bitmapBytes, layout.bitmapEncoding, 0)
+                } catch (e: CodecException) {
+                    fail("${spec.label}: subfield ${e.message}", bitmapStart, errorField)
+                    return out
+                }
+                out.add(FieldValue("${spec.path ?: spec.id}.bitmap", "Bitmap", bitmapBytes, bits.joinToString(","), bitmapStart, size))
+                for (bit in bits) {
+                    val sub = layout.fields[bit]
+                    if (sub == null) {
+                        fail("${spec.label}: subfield $bit is present in the bitmap but not defined", pos, errorField)
+                        return out
+                    }
+                    out.add(decodeElement(sub, sub.path ?: "${spec.id}.$bit", errorField) ?: return out)
+                }
+                if (remaining() > 0) fail("${spec.label}: ${remaining()} unexpected trailing byte(s) after the last subfield", pos, errorField)
+                return out
+            } finally {
+                pos = savedPos
+                limit = savedLimit
+            }
+        }
 
         /** Byte offset (relative to the value start) of character [index] of the decoded value. */
         private fun byteIndex(spec: FieldSpec, index: Int, valueLength: Int): Int {

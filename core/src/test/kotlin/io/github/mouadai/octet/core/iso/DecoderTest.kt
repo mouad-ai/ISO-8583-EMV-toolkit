@@ -296,4 +296,40 @@ class DecoderTest {
         assertEquals(4, stubbed.children.single().length)
         assertTrue(IsoDecoder(null).decode(hex(binary0100), binary87).complete().fields[55]!!.children.isEmpty())
     }
+
+    private val bitmappedDialect by lazy {
+        loadDialect(
+            """{"id": "bm", "name": "Bitmapped", "mti": {"encoding": "ASCII"}, "bitmap": {"encoding": "HEX_ASCII"},
+               "fields": {"127": {"name": "Private data", "type": "ans", "lengthType": "LLLVAR", "maxLength": 999,
+                  "subfields": {"layout": "BITMAP", "bitmapLength": 8, "bitmapEncoding": "HEX_ASCII", "fields": {
+                    "2": {"name": "Switch key", "type": "n", "lengthType": "FIXED", "maxLength": 6},
+                    "3": {"name": "Routing info", "type": "ans", "lengthType": "LLVAR", "maxLength": 20}}}}}}""",
+        )
+    }
+
+    @Test
+    fun `bitmap-driven subfields decode with offsets`() {
+        val text = "0100" + "8000000000000000" + "0000000000000002" + "029" + "6000000000000000" + "123456" + "05" + "Hello"
+        val message = decoder.decode(ascii(text), bitmappedDialect).complete()
+        val children = message.fields[127]!!.children
+        assertEquals(listOf("127.bitmap", "127.2", "127.3"), children.map { it.id })
+        assertEquals(listOf("2,3", "123456", "Hello"), children.map { it.value })
+        assertEquals(listOf(39, 55, 61), children.map { it.offset })
+        assertEquals(listOf(16, 6, 7), children.map { it.length })
+        assertEquals(2, children[2].prefixLength)
+        assertBytes(ascii(text), IsoEncoder.encode(message.toData(), bitmappedDialect).bytes())
+    }
+
+    @Test
+    fun `bitmap-driven subfield errors name the subfield and keep the field`() {
+        val undefined = "0100" + "8000000000000000" + "0000000000000002" + "022" + "5000000000000000" + "123456"
+        val result = decoder.decode(ascii(undefined), bitmappedDialect)
+        assertEquals("Field 127 (Private data): subfield 4 is present in the bitmap but not defined at offset 0x3D.", result.errors.single().message)
+        assertEquals(127, result.errors.single().fieldId)
+        assertEquals(listOf("127.bitmap", "127.2"), result.message.fields[127]!!.children.map { it.id })
+
+        val truncated = "0100" + "8000000000000000" + "0000000000000002" + "023" + "2000000000000000" + "08" + "Hello"
+        val error = decoder.decode(ascii(truncated), bitmappedDialect).errors.single()
+        assertEquals("Field 127.3 (Routing info): LLVAR length 8 exceeds remaining 5 bytes at offset 0x37.", error.message)
+    }
 }

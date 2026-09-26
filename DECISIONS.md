@@ -93,10 +93,38 @@ Choices made where SPEC.md leaves room, newest last.
 - **Field 55 children** come from the M1 `BerTlv` parser (`EmvBerTlvSubfieldDecoder`); their value
   is the raw tag value in hex, with names and sensitivity from the EMV tag dictionary. Formatting
   and bit meanings stay with `EmvDecoder`. The decoder is injectable for other TLV dialects.
-- **Not yet supported** (the loader says so): `BITMAP` subfield layouts, and private TLV tags or
-  lengths in an encoding different from the field's own character encoding.
+- **Not yet supported** (the loader says so): private TLV tags or lengths in an encoding
+  different from the field's own character encoding. (`BITMAP` subfields arrived in M6.)
 - **One JSON reader.** The dialect loader reuses the M1 reader (`emv/JsonResources`) rather than
   adding a second one.
+
+## M6 — jPOS import
+
+- **The class mapping is a data file** (`core/src/main/resources/octet/jpos/jpos-field-classes.json`)
+  written from jPOS's public naming conventions: `IFA_` ASCII lengths and data (binary as hex
+  text), `IFB_` BCD lengths with BCD numerics and raw binary (`H` = binary length), `IFE_` EBCDIC,
+  `IF_CHAR`/`IF_ECHAR` fixed text, `*_AMOUNT` signed amounts, `*_BITMAP` bitmaps, `IF_NOP` skipped.
+  jPOS `length` is taken as Octet `maxLength` (digits, characters or bytes as for Octet).
+- **`pad` on BCD numeric classes**: `true` is `BCD_LEFT_PAD`; otherwise right padding with `0`,
+  following jPOS's right-padded BCD. Other padding attributes are ignored.
+- **Unmapped classes become raw binary fields** with the length type read from the class name
+  (`LL`/`LLL`/`LLLL`) and a warning naming the class, as SPEC 7 asks.
+- **Field 0 sets the MTI encoding, field 1 the bitmap encoding; a bitmap class on field 65 turns
+  on the tertiary bitmap.** Fields 35/36 declared numeric are typed `z`, since they carry the
+  track separator. Fields 2, 14, 34, 35, 36, 45 and 52 are marked sensitive. A binary field 55
+  without a sub-field packager gets `BER_TLV` subfields.
+- **Sub-field packagers**: a bitmap sub-field (or `emitBitmap="true"`) gives the `BITMAP` layout
+  with the bitmap's `length` in bytes; fixed-length positional sub-fields give `FIXED`; BER-TLV
+  packagers give `BER_TLV`. Other tagged packagers and variable-length positional sub-fields are
+  left without subfields, with a warning.
+- **`version` is set to 1987 with a warning**, since packagers don't say; framing is `NONE`.
+- **The id comes from the file name** (`Acme Packager.xml` -> `acme-packager`); the IDE action adds
+  `-2`, `-3`, ... rather than overwriting an existing dialect file.
+- **XML safety**: the packager's DTD and all external entities are never loaded (entity resolver
+  returns nothing, external DTD loading and entities disabled, secure processing on).
+- **`BITMAP` subfields**: one fixed bitmap of `bitmapLength` bytes (binary, hex-ASCII or
+  hex-EBCDIC), all bits numbering subfields (no continuation bit); each subfield is a full field
+  definition with its own length prefix. Subfield errors are reported and keep the parent field.
 
 ## M7 — Builder
 

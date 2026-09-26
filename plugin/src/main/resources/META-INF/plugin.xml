@@ -19,4 +19,13 @@
                     icon="/icons/octetToolWindow.svg"
                     factoryClass="io.github.mouadai.octet.plugin.OctetToolWindowFactory"/>
     </extensions>
+
+    <actions>
+        <action id="Octet.ImportJposPackager"
+                class="io.github.mouadai.octet.plugin.jpos.ImportJposPackagerAction"
+                text="Import jPOS Packager as Octet Dialect..."
+                description="Convert a jPOS GenericPackager XML file into an Octet dialect in .octet/dialects">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

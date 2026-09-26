@@ -29,7 +29,7 @@ internal object HeaderCodec {
     /** Bytes one 64-bit bitmap occupies. */
     fun bitmapSize(encoding: BitmapEncoding): Int = if (encoding == BitmapEncoding.BINARY) 8 else 16
 
-    /** Returns the 1-based bit numbers set in one 64-bit bitmap, offset by [base] (0, 64 or 128). */
+    /** Returns the 1-based bit numbers set in a bitmap (64 bits for messages), offset by [base]. */
     fun decodeBitmap(bytes: ByteArray, encoding: BitmapEncoding, base: Int): List<Int> {
         val binary = when (encoding) {
             BitmapEncoding.BINARY -> bytes
@@ -40,7 +40,7 @@ internal object HeaderCodec {
             }
         }
         val bits = ArrayList<Int>()
-        for (i in 0 until 64) {
+        for (i in 0 until binary.size * 8) {
             if ((binary[i / 8].toInt() shr (7 - i % 8)) and 1 == 1) bits.add(base + i + 1)
         }
         return bits
