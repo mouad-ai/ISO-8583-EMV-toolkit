@@ -12,7 +12,7 @@ message specs.
 ## Description
 
 Payment developers read raw messages all day: hex dumps from logs, test tools and bug tickets,
-ISO 8583 layouts that differ per processor, and field 55 blobs nobody can read by eye. Cardwire
+ISO 8583 layouts that differ per processor, and field 55 blobs nobody can read by eye. Card Message Toolkit
 decodes them where you already work, without sending card data to a website.
 
 - **Offline and private**: no network calls, no telemetry. PANs and other sensitive values are
@@ -51,6 +51,6 @@ Step by step, with sample files: [screenshot-guide.md](screenshot-guide.md).
 ## Before publishing
 
 - Create the paid plugin under the vendor account (Mouad EL MRABATE) and request product code
-  `PCARDWIRE`. If JetBrains assigns a different code, change it in `plugin.xml`
-  (`product-descriptor`) and `CardwireLicense.PRODUCT_CODE`.
+  `PCARDMSGTOOLKIT`. If JetBrains assigns a different code, change it in `plugin.xml`
+  (`product-descriptor`) and `CardMsgLicense.PRODUCT_CODE`.
 - Set `release-date` and `release-version` in the `product-descriptor` for each release.

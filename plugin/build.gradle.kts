@@ -58,12 +58,12 @@ intellijPlatform {
     }
 }
 
-// Paid features stay unlocked in the sandbox IDE and in tests (see CardwireLicense.DEV_PROPERTY).
+// Paid features stay unlocked in the sandbox IDE and in tests (see CardMsgLicense.DEV_PROPERTY).
 tasks {
     runIde {
-        jvmArgs("-Dcardwire.license.dev=true")
+        jvmArgs("-Dcardmsg.license.dev=true")
     }
     test {
-        systemProperty("cardwire.license.dev", "true")
+        systemProperty("cardmsg.license.dev", "true")
     }
 }
