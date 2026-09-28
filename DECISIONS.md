@@ -12,18 +12,18 @@ Choices made where SPEC.md leaves room, newest last.
 - **Kotlin API/language version 2.2.** The IDE supplies the Kotlin stdlib at runtime
   (`kotlin.stdlib.default.dependency=false`), and 2025.3 bundles Kotlin 2.2, so code must not call
   newer stdlib APIs. `core` declares the stdlib `compileOnly` for the same reason.
-- **Plugin id `io.github.mouadai.cardwire`.** Reverse-DNS under the owner's GitHub namespace; the
+- **Plugin id `io.github.mouadai.cardmsg`.** Reverse-DNS under the owner's GitHub namespace; the
   product name was a placeholder until the M9 rename (see M9 below).
 - **No-network guard.** `NoNetworkTest` scans both the compiled classes (constant pool strings) and
   the sources of `core` for networking package prefixes, so it also catches fully-qualified uses
   that never appear in an import.
 - **`buildSearchableOptions` disabled** until there is a settings page (M5+), to keep builds fast.
-- **`runIde` in CI.** CI cannot open an IDE window, so `CardwireToolWindowTest` boots a headless IDE
+- **`runIde` in CI.** CI cannot open an IDE window, so `CardMsgToolWindowTest` boots a headless IDE
   with the plugin loaded and checks the tool window is registered and its panel builds.
 
 ## M1
 
-- **EMV code lives in `io.github.mouadai.cardwire.core.emv`**, data files in `core/src/main/resources/cardwire/emv/`
+- **EMV code lives in `io.github.mouadai.cardmsg.core.emv`**, data files in `core/src/main/resources/cardmsg/emv/`
   (`emv-tags.json`, `emv-bitfields.json`, `iso4217.json`, `iso3166.json`).
 - **No JSON library.** `core` has no third-party dependencies (the IDE supplies only the Kotlin
   stdlib), so a small strict JSON reader (`JsonResources`) loads the bundled data files.
@@ -112,11 +112,11 @@ Choices made where SPEC.md leaves room, newest last.
 
 ## M6 — jPOS import
 
-- **The class mapping is a data file** (`core/src/main/resources/cardwire/jpos/jpos-field-classes.json`)
+- **The class mapping is a data file** (`core/src/main/resources/cardmsg/jpos/jpos-field-classes.json`)
   written from jPOS's public naming conventions: `IFA_` ASCII lengths and data (binary as hex
   text), `IFB_` BCD lengths with BCD numerics and raw binary (`H` = binary length), `IFE_` EBCDIC,
   `IF_CHAR`/`IF_ECHAR` fixed text, `*_AMOUNT` signed amounts, `*_BITMAP` bitmaps, `IF_NOP` skipped.
-  jPOS `length` is taken as Cardwire `maxLength` (digits, characters or bytes as for Cardwire).
+  jPOS `length` is taken as Card Message Toolkit `maxLength` (digits, characters or bytes as for Card Message Toolkit).
 - **`pad` on BCD numeric classes**: `true` is `BCD_LEFT_PAD`; otherwise right padding with `0`,
   following jPOS's right-padded BCD. Other padding attributes are ignored.
 - **Unmapped classes become raw binary fields** with the length type read from the class name
@@ -163,7 +163,7 @@ Choices made where SPEC.md leaves room, newest last.
   mostly ids and hashes' prefixes; odd-length runs are skipped. The whole run becomes the link.
 - **Console links keep the tool window's current mode and dialect**, since a log line does not say
   what it contains; the editor actions pick ISO 8583 or EMV TLV explicitly.
-- **Settings are application-level** (`cardwire.xml` in the IDE config dir) and the console filter is
+- **Settings are application-level** (`cardmsg.xml` in the IDE config dir) and the console filter is
   checked per line, so toggling it applies to new output without restarting the run.
 
 ## M5 — Dialect authoring (schema, folders, overrides)
@@ -177,12 +177,12 @@ Choices made where SPEC.md leaves room, newest last.
 - **Schema checks what JSON Schema can**: enums, required properties, field-number range, LLVAR
   ≤ 99 and LLLVAR ≤ 999, `HEADER` framing needs a length. Cross-file checks (unknown `extends`
   id, cycles) belong to the loader.
-- **Schema lives in `core` resources** (`cardwire/dialect/dialect.schema.json`) so core tests can
+- **Schema lives in `core` resources** (`cardmsg/dialect/dialect.schema.json`) so core tests can
   check the built-in dialects against it; the plugin maps it onto dialect files.
-- **JSON plugin is an optional dependency.** Schema registration sits in `cardwire-json.xml`, so
-  Cardwire still loads in IDEs without the JSON plugin, just without dialect autocomplete.
-- **Folders**: project `.cardwire/dialects/*.json` (under the project dir and any content root, not
-  recursive) and user `<config dir>/cardwire/dialects/*.json`. A project-level VFS listener publishes
+- **JSON plugin is an optional dependency.** Schema registration sits in `cardmsg-json.xml`, so
+  Card Message Toolkit still loads in IDEs without the JSON plugin, just without dialect autocomplete.
+- **Folders**: project `.cardmsg/dialects/*.json` (under the project dir and any content root, not
+  recursive) and user `<config dir>/cardmsg/dialects/*.json`. A project-level VFS listener publishes
   `DialectsChangedListener.TOPIC` once per batch of changes touching those folders.
 - **YAML dialect files** are not mapped yet; JSON only until the loader supports YAML.
 
@@ -205,7 +205,7 @@ Choices made where SPEC.md leaves room, newest last.
 ## M9 — Release prep
 
 - **Licensing lives in one package** (`plugin/licensing`), as the Marketplace docs recommend, so
-  features only call `CardwireLicense.isEnabled(feature)`.
+  features only call `CardMsgLicense.isEnabled(feature)`.
 - **Freemium via `optional="true"`** on the product descriptor: the free edition works without a
   license, and paid features ask for one through the IDE's register dialog.
 - **Stamp checks follow JetBrains' official sample** (marketplace-makemecoffee-plugin): `key:`
@@ -213,11 +213,14 @@ Choices made where SPEC.md leaves room, newest last.
   `stamp:` values must be under an hour old; `eval:` values are rejected as in the sample.
 - **Unknown license state counts as enabled**: while the facade is not yet initialised, features
   are not locked, to avoid flicker and false lock-outs at startup.
-- **Dev property** `cardwire.license.dev=true` unlocks everything; set for `runIde` and tests only.
+- **Dev property** `cardmsg.license.dev=true` unlocks everything; set for `runIde` and tests only.
 - **First release is 1.0.0**: a paid plugin's `release-version` must match the start of the plugin
   version (`10` for 1.0.x), which no 0.x version can, so the version moved from 0.1.0 to 1.0.0.
-- **Product name Cardwire, code `PCARDWIRE`** (2026-09-26). "Octet" clashed with octet.com, a payments
-  company; Cardwire had no payments or Marketplace conflict in a web check (only an unrelated GPU
-  tool on GitHub). Plugin id, packages, dialect folder (`.cardwire/dialects`) and the dev property
-  (`cardwire.license.dev`) were renamed with it. Confirm the code when JetBrains approves the plugin.
+- **Product name Card Message Toolkit, code `PCARDMSGTOOLKIT`** (2026-09-28). "Octet" clashed with
+  octet.com, a payments company; the interim name "Cardwire" was dropped for a descriptive one.
+  Card Message Toolkit had no Marketplace, payments or GitHub conflict in a web check, and avoids
+  "Inspector" to stay distinct from the existing "ISO 8583 Inspector" plugin. ISO and EMV stay out
+  of the name (trademarks) and appear only descriptively. Code identifiers use the short form
+  `CardMsg` (plugin id `io.github.mouadai.cardmsg`, packages, `.cardmsg/dialects`,
+  `cardmsg.license.dev`). Confirm the code when JetBrains approves the plugin.
 - **`fields` is optional when a dialect `extends` another**, so a framing-only override is valid.

@@ -1,6 +1,6 @@
-# Cardwire
+# Card Message Toolkit
 
-Decode, build and diff ISO 8583 messages and EMV data without leaving your JetBrains IDE. Cardwire
+Decode, build and diff ISO 8583 messages and EMV data without leaving your JetBrains IDE. Card Message Toolkit
 works fully offline, with your own message specs.
 
 - **Offline and private.** No network calls and no telemetry. PANs, track data and other
@@ -8,7 +8,7 @@ works fully offline, with your own message specs.
 - **Your dialect.** Describe your processor's layout in a small JSON file, starting from a
   built-in layout and changing only what differs, or import an existing jPOS packager.
 - **Where you already are.** Decode a selection in the editor or the Run console, or paste a hex
-  dump into the Cardwire tool window.
+  dump into the Card Message Toolkit tool window.
 
 ## Features
 
@@ -27,7 +27,7 @@ works fully offline, with your own message specs.
 ## Dialects
 
 Built-in dialects are generic and follow the public ISO 8583 layouts. For your processor, add a
-file under `.cardwire/dialects/` in your project (shared through git) or in your user dialect folder:
+file under `.cardmsg/dialects/` in your project (shared through git) or in your user dialect folder:
 
 ```json
 {
@@ -43,7 +43,7 @@ file under `.cardwire/dialects/` in your project (shared through git) or in your
 
 The format, overrides and subfield layouts are described in [docs/dialects.md](docs/dialects.md).
 Ready-to-copy examples are in [samples/dialects](samples/dialects). The JSON Schema behind editor
-autocomplete is `core/src/main/resources/cardwire/dialect/dialect.schema.json`.
+autocomplete is `core/src/main/resources/cardmsg/dialect/dialect.schema.json`.
 
 ## Build
 

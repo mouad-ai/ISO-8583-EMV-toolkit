@@ -1,3 +1,3 @@
-rootProject.name = "cardwire"
+rootProject.name = "cardmsg"
 
 include(":core", ":plugin")

@@ -1,18 +1,18 @@
 # Dialect files
 
 A dialect describes one ISO 8583 message layout: how the MTI and bitmap are encoded, which framing
-prefixes to try, and how each field is laid out. Cardwire ships generic built-in dialects; you add
+prefixes to try, and how each field is laid out. Card Message Toolkit ships generic built-in dialects; you add
 your own for each processor.
 
 ## Where they go
 
 | Scope   | Folder                                   | Use                                |
 |---------|------------------------------------------|------------------------------------|
-| Project | `.cardwire/dialects/*.json` in the project  | Shared with the team through git   |
-| User    | `<IDE config dir>/cardwire/dialects/*.json` | Your own, available in every project |
+| Project | `.cardmsg/dialects/*.json` in the project  | Shared with the team through git   |
+| User    | `<IDE config dir>/cardmsg/dialects/*.json` | Your own, available in every project |
 
 Files in these folders get autocomplete, documentation and validation from the bundled schema
-(`core/src/main/resources/cardwire/dialect/dialect.schema.json`). Cardwire picks up added, edited,
+(`core/src/main/resources/cardmsg/dialect/dialect.schema.json`). Card Message Toolkit picks up added, edited,
 renamed and deleted files without a restart.
 
 ## A complete dialect
