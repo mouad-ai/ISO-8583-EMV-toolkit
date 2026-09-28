@@ -5,7 +5,7 @@
     <!-- Freemium: optional="true" keeps the plugin usable without a license; see CardMsgLicense.
          PCARDMSGTOOLKIT is the requested code; confirm it when JetBrains approves the paid plugin. release-version must
          match the start of the plugin version (1.0.x -> 10), or the Plugin Verifier rejects it. -->
-    <product-descriptor code="PCARDMSGTOOLKIT" release-date="20260926" release-version="10" optional="true"/>
+    <product-descriptor code="PCARDMSGTOOLKIT" release-date="20260928" release-version="10" optional="true"/>
 
     <description><![CDATA[
     Decode, build and diff ISO 8583 messages and EMV BER-TLV data (field 55 and more) without leaving your IDE.
