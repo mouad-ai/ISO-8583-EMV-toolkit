@@ -13,6 +13,8 @@ jobs:
   build:
     name: Test and verify plugin
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # publish the release zip on main
     steps:
       - uses: actions/checkout@v4
 
@@ -51,3 +53,21 @@ jobs:
         with:
           name: cardmsg-plugin
           path: plugin/build/distributions/*.zip
+
+      # On main, a non-snapshot version is published as a GitHub release "v<version>" with the
+      # plugin zip attached, ready to upload to JetBrains Marketplace.
+      - name: Publish release zip
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(grep '^version' gradle.properties | cut -d= -f2 | tr -d ' ')
+          case "$version" in *SNAPSHOT*) echo "Snapshot version $version, no release"; exit 0;; esac
+          zip=$(ls plugin/build/distributions/*.zip)
+          if gh release view "v$version" >/dev/null 2>&1; then
+            gh release upload "v$version" "$zip" --clobber
+          else
+            gh release create "v$version" "$zip" --target "$GITHUB_SHA" \
+              --title "Card Message Toolkit $version" \
+              --notes "Plugin zip for JetBrains Marketplace. See CHANGELOG.md."
+          fi
