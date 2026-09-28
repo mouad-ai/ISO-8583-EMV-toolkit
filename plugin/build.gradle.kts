@@ -60,6 +60,9 @@ intellijPlatform {
 
 // Paid features stay unlocked in the sandbox IDE and in tests (see CardMsgLicense.DEV_PROPERTY).
 tasks {
+    buildPlugin {
+        archiveBaseName.set("card-message-toolkit")
+    }
     runIde {
         jvmArgs("-Dcardmsg.license.dev=true")
     }
